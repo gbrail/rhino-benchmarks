@@ -1,6 +1,5 @@
 package org.brail.rhinobenchmarks;
 
-import org.mozilla.javascript.Context;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -8,11 +7,12 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class BenchmarkDriver {
-  private final HashMap<String, BenchmarkRunner> benchmarks;
+  private final Map<String, BenchmarkRunner> benchmarks;
 
   public static BenchmarkDriver load(String startName) throws IOException, BenchmarkException {
     Path start = Path.of(startName);
@@ -30,7 +30,7 @@ public class BenchmarkDriver {
     return new BenchmarkDriver(benchmarks);
   }
 
-  private BenchmarkDriver(HashMap<String, BenchmarkRunner> benchmarks) {
+  private BenchmarkDriver(Map<String, BenchmarkRunner> benchmarks) {
     this.benchmarks = benchmarks;
   }
 
