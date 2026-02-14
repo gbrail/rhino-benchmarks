@@ -1,5 +1,7 @@
 package org.brail.rhinobenchmarks;
 
+import org.mozilla.javascript.RhinoException;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -7,31 +9,43 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class BenchmarkDriver {
-  private final Map<String, BenchmarkRunner> benchmarks;
+  private final HashMap<String, BenchmarkRunner> benchmarks = new HashMap<>();
 
-  public static BenchmarkDriver load(String startName) throws IOException, BenchmarkException {
+  public void loadIndividualFiles(String startName) throws IOException, BenchmarkException {
     Path start = Path.of(startName);
     var files = listRegularFiles(start);
-    HashMap<String, BenchmarkRunner> benchmarks = new HashMap<>();
     for (var file : files) {
       String relName = start.relativize(file).toString();
       try {
         var runner = BenchmarkRunner.load(file);
         benchmarks.put(relName, runner);
-      } catch (BenchmarkException e) {
+      } catch (BenchmarkException | RhinoException | IllegalStateException e) {
         System.out.println("WARNING: Skipping " + relName + ": " + e);
       }
     }
-    return new BenchmarkDriver(benchmarks);
   }
 
-  private BenchmarkDriver(Map<String, BenchmarkRunner> benchmarks) {
-    this.benchmarks = benchmarks;
+  public void loadFile(String fileName) throws IOException, BenchmarkException {
+    try {
+      var runner = BenchmarkRunner.load(Path.of(fileName));
+      benchmarks.put(fileName, runner);
+    } catch (BenchmarkException | RhinoException | IllegalStateException e) {
+      System.out.println("WARNING: Skipping " + fileName + ": " + e);
+    }
+  }
+
+  public void loadCollection(String start, List<String> fileNames)
+      throws IOException, BenchmarkException {
+    try {
+      var runner = BenchmarkRunner.load(fileNames);
+      benchmarks.put(start, runner);
+    } catch (BenchmarkException | RhinoException e) {
+      System.out.println("WARNING: Skipping directory " + start + ": " + e);
+    }
   }
 
   public void dryRunAll() {
@@ -65,8 +79,8 @@ public class BenchmarkDriver {
     }
   }
 
-  private static String formatNanos(double nanos) {
-    if (nanos < 1000) return String.format("%.2f ns", nanos);
+  private static String formatNanos(long nanos) {
+    if (nanos < 1000) return String.format("%.2f ns", (double) nanos);
     if (nanos < 1000_000) return String.format("%.2f μs", nanos / 1000.0);
     if (nanos < 1000_000_000) return String.format("%.2f ms", nanos / 1000_000.0);
     return String.format("%.2f s", nanos / 1000_000_000.0);
