@@ -1,5 +1,7 @@
 plugins {
     id 'application'
+    id 'com.diffplug.spotless' version '8.1.0'
+    id 'net.ltgt.errorprone' version '4.3.0'
 }
 
 repositories {
@@ -11,8 +13,19 @@ repositories {
 dependencies {
     implementation ('org.mozilla:rhino:1.9.0')
     implementation ('org.mozilla:rhino-tools:1.9.0')
+    errorprone 'com.google.errorprone:error_prone_core:2.45.0'
 }
 
 application {
     mainClass = 'org.brail.rhinobenchmarks.Main'
+}
+
+spotless {
+    java {
+        googleJavaFormat('1.33.0')
+        importOrder()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
 }
