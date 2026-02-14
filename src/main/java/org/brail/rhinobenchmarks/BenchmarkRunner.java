@@ -23,6 +23,9 @@ public class BenchmarkRunner {
   @SuppressWarnings("unused")
   private volatile Object blackhole;
 
+  // 250 milliseconds in nanos
+  private static final long BATCH_THRESHOLD_MS = 250 * 1000000;
+
   private BenchmarkRunner(Context cx, Scriptable scope, Scriptable benchmark, Callable run) {
     this.cx = cx;
     this.scope = scope;
@@ -32,10 +35,27 @@ public class BenchmarkRunner {
 
   public static BenchmarkRunner load(Path path) throws BenchmarkException, IOException {
     var cx = Context.enter();
-    var scope = cx.initStandardObjects();
+    var scope = makeScope(cx);
     try (var rdr = new FileReader(path.toFile(), StandardCharsets.UTF_8)) {
       cx.evaluateReader(scope, rdr, path.getFileName().toString(), 1, null);
     }
+    return makeRunner(cx, scope);
+  }
+
+  public static BenchmarkRunner load(List<String> fileNames)
+      throws BenchmarkException, IOException {
+    var cx = Context.enter();
+    var scope = makeScope(cx);
+    for (var file : fileNames) {
+      try (var rdr = new FileReader(file, StandardCharsets.UTF_8)) {
+        cx.evaluateReader(scope, rdr, file, 1, null);
+      }
+    }
+    return makeRunner(cx, scope);
+  }
+
+  private static BenchmarkRunner makeRunner(Context cx, Scriptable scope)
+      throws BenchmarkException {
     Object benchmarkObj = ScriptableObject.getProperty(scope, "Benchmark");
     if (!(benchmarkObj instanceof Function cons)) {
       throw new BenchmarkException("Script did not create \"Benchmark\" object");
@@ -53,31 +73,56 @@ public class BenchmarkRunner {
     return new BenchmarkRunner(cx, scope, bo, f);
   }
 
-  public void runOnce() {
-    blackhole = run.call(cx, scope, benchmark, ScriptRuntime.emptyArgs);
+  private static Scriptable makeScope(Context cx) {
+    var scope = cx.initStandardObjects();
+    Performance.init(cx, scope);
+    return scope;
   }
 
   public List<Timing> run(Duration d) {
-    var timings = new ArrayList<Timing>();
+    long firstTiming = runOnce();
+
     long start = System.currentTimeMillis();
     long end = start + d.toMillis();
-    long itStart;
-    while ((itStart = System.currentTimeMillis()) < end) {
-      long secEnd = itStart + 1000;
+    if (firstTiming > BATCH_THRESHOLD_MS) {
+      return runIndividually(end);
+    }
+    return runInBatches(end);
+  }
+
+  private List<Timing> runIndividually(long endTime) {
+    var timings = new ArrayList<Timing>();
+    while (System.currentTimeMillis() < endTime) {
+      long iterationTime = runOnce();
+      timings.add(new Timing(1, iterationTime));
+    }
+    return timings;
+  }
+
+  private List<Timing> runInBatches(long endTime) {
+    var timings = new ArrayList<Timing>();
+    long iterationStart;
+    while ((iterationStart = System.currentTimeMillis()) < endTime) {
+      long iterationEnd = iterationStart + 1000;
       long totalNanos = 0;
-      int totalInvocations = 0;
-      while (System.currentTimeMillis() < secEnd) {
-        long nanoStart = System.nanoTime();
-        blackhole = run.call(cx, scope, benchmark, ScriptRuntime.emptyArgs);
-        long nanoEnd = System.nanoTime();
-        totalNanos += (nanoEnd - nanoStart);
+      int totalInvocations = 1;
+      while (System.currentTimeMillis() < iterationEnd) {
+        long it = runOnce();
+        totalNanos += it;
         totalInvocations++;
       }
-      double nanosPerOp = (double) totalNanos / (double) totalInvocations;
+      long nanosPerOp = totalNanos / totalInvocations;
       timings.add(new Timing(totalInvocations, nanosPerOp));
     }
     return timings;
   }
 
-  public record Timing(int invocations, double nanosPerOp) {}
+  public long runOnce() {
+    long nanoStart = System.nanoTime();
+    blackhole = run.call(cx, scope, benchmark, ScriptRuntime.emptyArgs);
+    long nanoEnd = System.nanoTime();
+    return nanoEnd - nanoStart;
+  }
+
+  public record Timing(int invocations, long nanosPerOp) {}
 }
