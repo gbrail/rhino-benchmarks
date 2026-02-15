@@ -36,15 +36,6 @@ public class Main {
               "./cdjs/collision_detector.js",
               "./cdjs/benchmark.js"));
 
-      /*driver.loadCollection(
-      "./RexBench/FlightPlanner",
-      List.of(
-          "./RexBench/FlightPlanner/airways.js",
-          "./RexBench/FlightPlanner/waypoints.js.z",
-          "./RexBench/FlightPlanner/flight_planner.js",
-          "./RexBench/FlightPlanner/expectations.js",
-          "./RexBench/FlightPlanner/benchmark.js"));*/
-
       driver.loadCollection(
           "./RexBench/UniPoker",
           List.of(
@@ -74,12 +65,6 @@ public class Main {
               "./bigint/noble-bls12-381-bundle.js",
               "./bigint/noble-benchmark.js"));
       driver.loadCollection(
-          "bigint-paillier",
-          List.of(
-              "./bigint/web-crypto-sham.js",
-              "./bigint/paillier-bundle.js",
-              "./bigint/paillier-benchmark.js"));
-      driver.loadCollection(
           "bigint-bigdenary",
           List.of("./bigint/bigdenary-bundle.js", "./bigint/bigdenary-benchmark.js"));
     } catch (BenchmarkException | IOException e) {
@@ -89,6 +74,6 @@ public class Main {
     }
 
     driver.dryRunAll();
-    driver.runAll(Duration.ofSeconds(5));
+    driver.runAll(Duration.ofSeconds(5), Duration.ofSeconds(5));
   }
 }

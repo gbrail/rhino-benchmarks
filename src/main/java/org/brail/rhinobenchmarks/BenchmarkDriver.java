@@ -1,16 +1,16 @@
 package org.brail.rhinobenchmarks;
 
-import org.mozilla.javascript.RhinoException;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.mozilla.javascript.RhinoException;
 
 public class BenchmarkDriver {
   private final HashMap<String, BenchmarkRunner> benchmarks = new HashMap<>();
@@ -56,14 +56,11 @@ public class BenchmarkDriver {
     }
   }
 
-  public void runAll(Duration d) {
+  public void runAll(Duration warmup, Duration d) {
     for (var e : benchmarks.entrySet()) {
-      System.out.print(e.getKey() + "...");
-      var timings = e.getValue().run(d);
-      System.out.println("OK");
-      for (var t : timings) {
-        System.out.println(t.invocations() + " invocations, " + formatNanos(t.nanosPerOp()));
-      }
+      System.out.println(e.getKey() + "...");
+      var timings = e.getValue().run(warmup, d);
+      printResult(timings);
     }
   }
 
@@ -84,5 +81,28 @@ public class BenchmarkDriver {
     if (nanos < 1000_000) return String.format("%.2f μs", nanos / 1000.0);
     if (nanos < 1000_000_000) return String.format("%.2f ms", nanos / 1000_000.0);
     return String.format("%.2f s", nanos / 1000_000_000.0);
+  }
+
+  private static void printResult(List<BenchmarkRunner.Timing> timings) {
+    long[] allTimings = new long[timings.size()];
+    int i = 0;
+    long totalTime = 0;
+    for (var t : timings) {
+      allTimings[i++] = t.nanosPerOp();
+      totalTime += t.nanosPerOp();
+    }
+    Arrays.sort(allTimings);
+    long average = totalTime / allTimings.length;
+    System.out.println("  Iterations: " + allTimings.length);
+    System.out.println("  Average:    " + formatNanos(average));
+    System.out.println("  Median:     " + formatNanos(getP(allTimings, 50)));
+    System.out.println("  P99:        " + formatNanos(getP(allTimings, 99)));
+    System.out.println("  Max:        " + formatNanos(allTimings[allTimings.length - 1]));
+  }
+
+  private static long getP(long[] results, int pct) {
+    assert pct < 100;
+    int ix = (results.length * pct) / 100;
+    return results[ix];
   }
 }

@@ -21,7 +21,7 @@ public class BenchmarkRunner {
   private final Callable run;
 
   @SuppressWarnings("unused")
-  private volatile Object blackhole;
+  public static volatile Object blackhole;
 
   // 250 milliseconds in nanos
   private static final long BATCH_THRESHOLD_MS = 250 * 1000000;
@@ -79,15 +79,20 @@ public class BenchmarkRunner {
     return scope;
   }
 
-  public List<Timing> run(Duration d) {
-    long firstTiming = runOnce();
-
+  public List<Timing> run(Duration warmup, Duration d) {
+    var results = new ArrayList<Timing>();
     long start = System.currentTimeMillis();
-    long end = start + d.toMillis();
-    if (firstTiming > BATCH_THRESHOLD_MS) {
-      return runIndividually(end);
+    long end = start + warmup.toMillis();
+    while (System.currentTimeMillis() < end) {
+      runOnce();
     }
-    return runInBatches(end);
+    start = System.currentTimeMillis();
+    end = start + d.toMillis();
+    while (System.currentTimeMillis() < end) {
+      long t = runOnce();
+      results.add(new Timing(1, t));
+    }
+    return results;
   }
 
   private List<Timing> runIndividually(long endTime) {
