@@ -68,6 +68,8 @@ public class Main implements Callable<Integer> {
         driver.loadFile("octane-richards", "./Octane/richards.js");
 
         driver.loadFile("simple-hash-map", "./simple/hash-map.js");
+        driver.loadFile("simple-doxbee-promise", "./simple/doxbee-promise.js");
+        driver.loadFile("simple-doxbee-async", "./simple/doxbee-async.js");
 
         driver.loadCollection(
             "cdjs",
@@ -108,14 +110,36 @@ public class Main implements Callable<Integer> {
                 "./RexBench/OfflineAssembler/benchmark.js"));
 
         driver.loadCollection(
-            "bigint-noble-bls12-381",
-            List.of(
-                "./bigint/web-crypto-sham.js",
-                "./bigint/noble-bls12-381-bundle.js",
-                "./bigint/noble-benchmark.js"));
-        driver.loadCollection(
             "bigint-bigdenary",
             List.of("./bigint/bigdenary-bundle.js", "./bigint/bigdenary-benchmark.js"));
+
+        driver.loadCollection(
+            "ARES-6-Air",
+            List.of(
+                "./ARES-6/Air/symbols.js",
+                "./ARES-6/Air/tmp_base.js",
+                "./ARES-6/Air/arg.js",
+                "./ARES-6/Air/basic_block.js",
+                "./ARES-6/Air/code.js",
+                "./ARES-6/Air/frequented_block.js",
+                "./ARES-6/Air/inst.js",
+                "./ARES-6/Air/opcode.js",
+                "./ARES-6/Air/reg.js",
+                "./ARES-6/Air/stack_slot.js",
+                "./ARES-6/Air/tmp.js",
+                "./ARES-6/Air/util.js",
+                "./ARES-6/Air/custom.js",
+                "./ARES-6/Air/liveness.js",
+                "./ARES-6/Air/insertion_set.js",
+                "./ARES-6/Air/allocate_stack.js",
+                "./ARES-6/Air/payload-gbemu-executeIteration.js",
+                "./ARES-6/Air/payload-imaging-gaussian-blur-gaussianBlur.js",
+                "./ARES-6/Air/payload-airjs-ACLj8C.js",
+                "./ARES-6/Air/payload-typescript-scanIdentifier.js",
+                "./ARES-6/Air/benchmark.js"));
+
+        driver.loadCollection(
+            "ARES-6-ML", List.of("./ARES-6/ml/index.js", "./ARES-6/ml/benchmark.js"));
       }
     } catch (BenchmarkException | IOException e) {
       System.out.println("Can't load benchmarks: " + e);

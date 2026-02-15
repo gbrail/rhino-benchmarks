@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Apple Inc. All rights reserved.
+ * Copyright (C) 2016 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,52 +29,48 @@ function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = 
 function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-this.useUnicode = true;
-if (!String.prototype.toTitleCase) {
-  String.prototype.toTitleCase = function () {
-    return this.charAt(0).toUpperCase() + this.substr(1).toLowerCase();
-  };
-}
-var UnicodeStrings = /*#__PURE__*/function () {
-  function UnicodeStrings() {
-    _classCallCheck(this, UnicodeStrings);
+var TmpBase = /*#__PURE__*/function () {
+  function TmpBase() {
+    _classCallCheck(this, TmpBase);
   }
-  return _createClass(UnicodeStrings, null, [{
-    key: "get",
-    value: function get(str) {
-      if (!this.instance) {
-        this.instance = this;
-        for (var keyStr in UnicodeStrings.table) {
-          var keyStrLower = keyStr.toLowerCase();
-          var valueStrLower = UnicodeStrings.table[keyStr].toLowerCase();
-          UnicodeStrings.table[keyStrLower] = valueStrLower;
-          var keyStrTitle = keyStr.toTitleCase();
-          var valueStrTitle = UnicodeStrings.table[keyStr].toTitleCase();
-          UnicodeStrings.table[keyStrTitle] = valueStrTitle;
-        }
-      }
-      return this.table[str];
+  return _createClass(TmpBase, [{
+    key: "isGP",
+    get: function () {
+      return this.type == GP;
+    }
+  }, {
+    key: "isFP",
+    get: function () {
+      return this.type == FP;
+    }
+  }, {
+    key: "isGPR",
+    get: function () {
+      return this.isReg && this.isGP;
+    }
+  }, {
+    key: "isFPR",
+    get: function () {
+      return this.isReg && this.isFP;
+    }
+  }, {
+    key: "reg",
+    get: function () {
+      if (!this.isReg) throw new Error("Called .reg on non-Reg");
+      return this;
+    }
+  }, {
+    key: "gpr",
+    get: function () {
+      if (!this.isGPR) throw new Error("Called .gpr on non-GPR");
+      return this;
+    }
+  }, {
+    key: "fpr",
+    get: function () {
+      if (!this.isFPR) throw new Error("Called .fpr on non-FPR");
+      return this;
     }
   }]);
 }();
-UnicodeStrings.instance = null;
-UnicodeStrings.table = {
-  "START": "\u{041d}\u{0410}\u{0427}\u{0410}\u{0422}\u{042c}",
-  // НАЧАТЬ
-  "TIMING": "\u{0425}\u{0420}\u{041e}\u{041d}\u{041e}\u{041c}\u{0415}\u{0422}\u{0420}\u{0410}\u{0416}",
-  // ХРОНОМЕТРАЖ
-  "TAXI": "\u{0420}\u{0423}\u{041b}\u{0415}\u{041d}\u{0418}\u{0415}",
-  // РУЛЕНИЕ
-  "RUNUP": "\u{0414}\u{0412}\u{0418}\u{0413}\u{0410}\u{0422}\u{0415}\u{041b}\u{042c}-\u{041d}\u{0410}\u{041a}\u{0410}\u{0422}\u{0410}",
-  // ДВИГАТЕЛЬ НАКАТА
-  "TAKEOFF": "\u{0412}\u{0417}\u{041b}\u{0415}\u{0422}",
-  // ВЗЛЕТ
-  "CLIMB": "\u{041f}\u{041e}\u{0414}\u{041d}\u{042f}\u{0422}\u{042c}\u{0421}\u{042f}",
-  // ПОДНЯТЬСЯ
-  "PATTERN": "\u{041a}\u{0420}\u{0423}\u{0413}",
-  // КРУГ
-  "LEFT": "\u{041b}\u{0415}\u{0412}\u{042b}\u{0419}",
-  // ЛЕВЫЙ
-  "RIGHT": "\u{041f}\u{0420}\u{0410}\u{0412}\u{042b}\u{0419}" // ПРАВЫЙ
-};
 

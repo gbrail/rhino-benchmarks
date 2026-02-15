@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Apple Inc. All rights reserved.
+ * Copyright (C) 2016 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,28 +29,68 @@ function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = 
 function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-var Benchmark = /*#__PURE__*/function () {
-  function Benchmark() {
-    _classCallCheck(this, Benchmark);
+var Insertion = /*#__PURE__*/function () {
+  function Insertion(index, element) {
+    _classCallCheck(this, Insertion);
+    this._index = index;
+    this._element = element;
   }
-  return _createClass(Benchmark, [{
-    key: "runIteration",
-    value: function runIteration() {
-      for (var i = 0; i < 5; i++) {
-        setupUserWaypoints();
-        for (var flightPlan of expectedFlightPlans) {
-          flightPlan.reset();
-          flightPlan.resolveRoute();
-        }
-      }
+  return _createClass(Insertion, [{
+    key: "index",
+    get: function () {
+      return this._index;
     }
   }, {
-    key: "validate",
-    value: function validate(iterations) {
-      for (var flightPlan of expectedFlightPlans) {
-        flightPlan.calculate();
-        flightPlan.checkExpectations();
+    key: "element",
+    get: function () {
+      return this._element;
+    }
+  }, {
+    key: "lessThan",
+    value: function lessThan(other) {
+      return this._index < other._index;
+    }
+  }]);
+}();
+var InsertionSet = /*#__PURE__*/function () {
+  function InsertionSet() {
+    _classCallCheck(this, InsertionSet);
+    this._insertions = [];
+  }
+  return _createClass(InsertionSet, [{
+    key: "appendInsertion",
+    value: function appendInsertion(insertion) {
+      this._insertions.push(insertion);
+    }
+  }, {
+    key: "append",
+    value: function append(index, element) {
+      this.appendInsertion(new Insertion(index, element));
+    }
+  }, {
+    key: "execute",
+    value: function execute(target) {
+      // We bubble-sort because that's what the C++ code, and for the same reason as we do it:
+      // the stdlib doesn't have a stable sort and mergesort is slower in the common case of the
+      // array usually being sorted. This array is usually sorted.
+      bubbleSort(this._insertions, (a, b) => a.lessThan(b));
+      var numInsertions = this._insertions.length;
+      if (!numInsertions) return 0;
+      var originalTargetSize = target.length;
+      target.length += numInsertions;
+      var lastIndex = target.length;
+      for (var indexInInsertions = numInsertions; indexInInsertions--;) {
+        var insertion = this._insertions[indexInInsertions];
+        if (indexInInsertions && insertion.index < this._insertions[indexInInsertions - 1].index) throw new Error("Insertions out of order");
+        if (insertion.index > originalTargetSize) throw new Error("Out-of-bounds insertion");
+        var firstIndex = insertion.index + indexInInsertions;
+        var indexOffset = indexInInsertions + 1;
+        for (var i = lastIndex; --i > firstIndex;) target[i] = target[i - indexOffset];
+        target[firstIndex] = insertion.element;
+        lastIndex = firstIndex;
       }
+      this._insertions = [];
+      return numInsertions;
     }
   }]);
 }();

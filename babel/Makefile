@@ -3,14 +3,12 @@ TGT_DIR = $(realpath ..)
 
 SOURCES = \
 	  $(wildcard $(SRC_DIR)/SunSpider/*.js) \
-	  $(wildcard $(SRC_DIR)/ARES-6/Basic/*.js) \
+	  $(wildcard $(SRC_DIR)/ARES-6/Air/*.js) \
 	  $(wildcard $(SRC_DIR)/cdjs/*.js) \
 	  $(wildcard $(SRC_DIR)/Octane/*.js) \
-	  $(wildcard $(SRC_DIR)/RexBench/FlightPlanner/*.js) \
 	  $(wildcard $(SRC_DIR)/RexBench/UniPoker/*.js) \
 	  $(wildcard $(SRC_DIR)/RexBench/OfflineAssembler/*.js) \
 	  $(wildcard $(SRC_DIR)/simple/*.js) \
-	  $(wildcard $(SRC_DIR)/SeaMonster/*.js) \
 	  $(wildcard $(SRC_DIR)/bigint/*.js) 
 
 SOURCES := $(filter-out %/, $(SOURCES))
