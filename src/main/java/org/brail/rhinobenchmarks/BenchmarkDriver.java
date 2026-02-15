@@ -56,10 +56,10 @@ public class BenchmarkDriver {
     }
   }
 
-  public void runAll(Duration warmup, Duration d) {
+  public void runAll(Duration warmupMin, Duration warmupMax, Duration d) {
     for (var e : benchmarks.entrySet()) {
       System.out.println(e.getKey() + "...");
-      var timings = e.getValue().run(warmup, d);
+      var timings = e.getValue().run(warmupMin, warmupMax, d);
       printResult(timings);
     }
   }
