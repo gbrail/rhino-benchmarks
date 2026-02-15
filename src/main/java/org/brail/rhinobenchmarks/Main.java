@@ -74,6 +74,6 @@ public class Main {
     }
 
     driver.dryRunAll();
-    driver.runAll(Duration.ofSeconds(5), Duration.ofSeconds(5));
+    driver.runAll(Duration.ofSeconds(2), Duration.ofSeconds(15), Duration.ofSeconds(5));
   }
 }
