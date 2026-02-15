@@ -137,9 +137,6 @@ public class Main implements Callable<Integer> {
                 "./ARES-6/Air/payload-airjs-ACLj8C.js",
                 "./ARES-6/Air/payload-typescript-scanIdentifier.js",
                 "./ARES-6/Air/benchmark.js"));
-
-        driver.loadCollection(
-            "ARES-6-ML", List.of("./ARES-6/ml/index.js", "./ARES-6/ml/benchmark.js"));
       }
     } catch (BenchmarkException | IOException e) {
       System.out.println("Can't load benchmarks: " + e);
