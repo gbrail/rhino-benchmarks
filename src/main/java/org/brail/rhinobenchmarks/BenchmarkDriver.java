@@ -1,35 +1,17 @@
 package org.brail.rhinobenchmarks;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.mozilla.javascript.RhinoException;
 
 public class BenchmarkDriver {
   private final HashMap<String, BenchmarkRunner> benchmarks = new HashMap<>();
   private final ArrayList<Result> allResults = new ArrayList<>();
-
-  public void loadIndividualFiles(String startName) throws IOException, BenchmarkException {
-    Path start = Path.of(startName);
-    var files = listRegularFiles(start);
-    for (var file : files) {
-      String relName = start.relativize(file).toString();
-      try {
-        var runner = BenchmarkRunner.load(file);
-        benchmarks.put(relName, runner);
-      } catch (BenchmarkException | RhinoException | IllegalStateException e) {
-        System.out.println("WARNING: Skipping " + relName + ": " + e);
-      }
-    }
-  }
 
   public void loadFile(String name, String fileName) throws IOException, BenchmarkException {
     try {
@@ -70,18 +52,6 @@ public class BenchmarkDriver {
 
   public List<Result> results() {
     return allResults;
-  }
-
-  private static List<Path> listRegularFiles(Path start) throws IOException {
-    if (start == null) {
-      throw new IllegalArgumentException("start path must not be null");
-    }
-    if (!Files.exists(start)) {
-      return Collections.emptyList();
-    }
-    try (Stream<Path> stream = Files.walk(start)) {
-      return stream.filter(Files::isRegularFile).collect(Collectors.toList());
-    }
   }
 
   private static Result makeResult(String name, List<Long> timings) {

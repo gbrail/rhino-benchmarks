@@ -7,9 +7,11 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.mozilla.javascript.Callable;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
+import org.mozilla.javascript.NativePromise;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
@@ -107,9 +109,30 @@ public class BenchmarkRunner {
 
   public long runOnce() {
     long nanoStart = System.nanoTime();
-    blackhole = run.call(cx, scope, benchmark, ScriptRuntime.emptyArgs);
+    Object result = run.call(cx, scope, benchmark, ScriptRuntime.emptyArgs);
     long nanoEnd = System.nanoTime();
+    if (result instanceof NativePromise p) {
+      waitForPromise(p);
+      nanoEnd = System.nanoTime();
+    }
+    blackhole = result;
     return nanoEnd - nanoStart;
+  }
+
+  private void waitForPromise(NativePromise p) {
+    var wrapper = new PromiseWrapper(p);
+    var resolved = new AtomicBoolean();
+    wrapper.then(
+        cx,
+        scope,
+        (lcx, ls, v) -> resolved.set(true),
+        (lcx, ls, e) -> {
+          throw new RuntimeException("Unexpected promise rejection: " + e);
+        });
+    cx.processMicrotasks();
+    if (!resolved.get()) {
+      System.out.println("WARNING: Promise was never resolved");
+    }
   }
 
   public void warmUp(Duration warmupMin, Duration warmupMax) {
