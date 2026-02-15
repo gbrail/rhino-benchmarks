@@ -25,6 +25,7 @@ public class BenchmarkRunner {
 
   private static final double GOOD_VARIANCE = 0.1;
   private static final int WARMUP_BATCH = 5;
+  private static final int MAX_RERUNS = 5;
   // 100 milliseconds
   private static final long QUICK_BENCHMARK = 100 * 1000000;
 
@@ -81,15 +82,26 @@ public class BenchmarkRunner {
     return scope;
   }
 
-  public List<Timing> run(Duration warmupMin, Duration warmupMax, Duration d) {
+  public List<Long> run(Duration warmupMin, Duration warmupMax, Duration d) {
     warmUp(warmupMin, warmupMax);
-    var results = new ArrayList<Timing>();
-    long start = System.currentTimeMillis();
-    long end = start + d.toMillis();
-    while (System.currentTimeMillis() < end) {
-      long t = runOnce();
-      results.add(new Timing(1, t));
+    ArrayList<Long> results = null;
+    double variance = 0;
+    for (int i = 0; i < MAX_RERUNS; i++) {
+      results = new ArrayList<>();
+      long start = System.currentTimeMillis();
+      long end = start + d.toMillis();
+      while (System.currentTimeMillis() < end) {
+        long t = runOnce();
+        results.add(t);
+      }
+      variance = Utils.calculateVariance(results);
+      if (variance <= GOOD_VARIANCE) {
+        return results;
+      } else if (i < (MAX_RERUNS - 1)) {
+        System.out.printf("Re-running because variance is %.2f\n", variance);
+      }
     }
+    System.out.printf("WARNING: Too much variance: %.2f\n", variance);
     return results;
   }
 
@@ -118,13 +130,13 @@ public class BenchmarkRunner {
         long elapsed = runOnce();
         batch.add(elapsed);
       }
-      double batchVariance = calculateVariance(batch);
+      double batchVariance = Utils.calculateVariance(batch);
       if (batchVariance <= GOOD_VARIANCE
           && previousBatch != null
           && System.currentTimeMillis() > endMin) {
         // Not too much variance in the batch
-        double avg = average(batch);
-        double lastAvg = average(previousBatch);
+        double avg = Utils.average(batch);
+        double lastAvg = Utils.average(previousBatch);
         double change = Math.abs(avg - lastAvg) / lastAvg;
         if (change <= GOOD_VARIANCE) {
           // This batch and the last batch are also fairly close
@@ -134,32 +146,6 @@ public class BenchmarkRunner {
       }
       previousBatch = batch;
     }
-    System.out.println(
-        "Never got to < " + GOOD_VARIANCE + " in " + warmupMax.toSeconds() + " seconds");
+    System.out.printf("Never got to <%.2f in %d seconds\n", GOOD_VARIANCE, warmupMax.toSeconds());
   }
-
-  private static double average(List<Long> timings) {
-    return timings.stream().mapToLong(Long::longValue).average().orElse(0);
-  }
-
-  /** Calculate coefficient of variance. */
-  private static double calculateVariance(List<Long> timings) {
-    if (timings.size() <= 1) {
-      return 0.0;
-    }
-
-    double mean = average(timings);
-
-    if (mean == 0) return 0.0;
-
-    double variance =
-        timings.stream().mapToDouble(t -> Math.pow((double) t - mean, 2)).average().orElse(0);
-
-    double standardDeviation = Math.sqrt(variance);
-
-    // CV = σ / μ
-    return standardDeviation / mean;
-  }
-
-  public record Timing(int invocations, long nanosPerOp) {}
 }
