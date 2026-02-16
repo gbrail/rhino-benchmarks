@@ -9,10 +9,15 @@ import java.util.HashMap;
 import java.util.List;
 import org.mozilla.javascript.RhinoException;
 
+/** This class loads all the benchmarks and runs them. */
 public class BenchmarkDriver {
   private final HashMap<String, BenchmarkRunner> benchmarks = new HashMap<>();
   private final ArrayList<Result> allResults = new ArrayList<>();
 
+  /**
+   * Load a single JavaScript source file. It will be run in its own isolated scope and with its own
+   * Context.
+   */
   public void loadFile(String name, String fileName) throws IOException, BenchmarkException {
     try {
       var runner = BenchmarkRunner.load(Path.of(fileName));
@@ -22,6 +27,11 @@ public class BenchmarkDriver {
     }
   }
 
+  /**
+   * Load a list of source files. The files will all be executed in the order specified in the same
+   * scope and with the same context, so they may all refer to each other. Whatever the value of the
+   * "Benchmark" property is when all is * complete will be used to start the benchmark.
+   */
   public void loadCollection(String start, List<String> fileNames)
       throws IOException, BenchmarkException {
     try {
@@ -32,6 +42,7 @@ public class BenchmarkDriver {
     }
   }
 
+  /** Run each benchmark's "runIteration" method once. */
   public void dryRunAll() {
     for (var e : benchmarks.entrySet()) {
       System.out.print(e.getKey() + "...");
@@ -40,6 +51,12 @@ public class BenchmarkDriver {
     }
   }
 
+  /**
+   * Run each benchmark. First it will be run between "warmupMin" and "warmupMax" time until five
+   * ierations in a row produce a relatively consistent result. Then, it will be run for "d" time
+   * and all the results will be gathered. If the variation between results is too great, it will
+   * retry the run.
+   */
   public void runAll(Duration warmupMin, Duration warmupMax, Duration d) {
     for (var e : benchmarks.entrySet()) {
       System.out.println(e.getKey() + "...");

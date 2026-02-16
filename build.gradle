@@ -11,10 +11,19 @@ repositories {
 }
 
 dependencies {
-    implementation('org.mozilla:rhino:1.9.0')
+    implementation('org.mozilla:rhino:2.0.0-SNAPSHOT')
     implementation('info.picocli:picocli:4.7.7')
     implementation('com.fasterxml.jackson.core:jackson-databind:2.21.0')
     errorprone 'com.google.errorprone:error_prone_core:2.45.0'
+}
+
+tasks.register('printDependencies') {
+    def runtimeClasspath = configurations.runtimeClasspath
+    doLast {
+        runtimeClasspath.each {
+            println it.absolutePath
+        }
+    }
 }
 
 application {
