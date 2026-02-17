@@ -41,6 +41,19 @@ tasks.register('compare', JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
+tasks.register('profile', JavaExec) {
+    mainClass = 'org.brail.rhinobenchmarks.Main'
+    classpath = sourceSets.main.runtimeClasspath
+    jvmArgs = [
+            "-XX:MaxGCPauseMillis=50",
+            "-XX:-TieredCompilation",
+            "-Xms4G",
+            "-Xmx4G",
+            "-Xbatch",
+            "-XX:StartFlightRecording=filename=jfr.jfr"
+            ]
+}
+
 spotless {
     java {
         googleJavaFormat('1.33.0')

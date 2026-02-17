@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import org.mozilla.javascript.RhinoException;
@@ -65,6 +66,23 @@ public class BenchmarkDriver {
       result.print();
       allResults.add(result);
     }
+  }
+
+  /** Run just one benchmark. */
+  public void runOne(String name, Duration warmupMin, Duration warmupMax, Duration d) {
+    var test = benchmarks.get(name);
+    if (test == null) {
+      System.out.println("No benchmark named \"" + name + "\"");
+      return;
+    }
+    var timings = test.run(warmupMin, warmupMax, d);
+    var result = makeResult(name, timings);
+    result.print();
+    allResults.add(result);
+  }
+
+  public Collection<String> testNames() {
+    return benchmarks.keySet();
   }
 
   public List<Result> results() {

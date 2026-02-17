@@ -26,6 +26,11 @@ public class Main implements Callable<Integer> {
   private String testFileName;
 
   @CommandLine.Option(
+      names = {"-1", "--test"},
+      description = "Run the single test with the specified name")
+  private String singleTest;
+
+  @CommandLine.Option(
       names = {"-j", "--json"},
       description = "Output JSON results to this file")
   private String jsonOutput;
@@ -42,6 +47,11 @@ public class Main implements Callable<Integer> {
       defaultValue = DEFAULT_RUN_TIME)
   private int runTime;
 
+  @CommandLine.Option(
+      names = {"-l", "--list-tests"},
+      description = "List all the tests and then exit")
+  private boolean listTests;
+
   @Override
   public Integer call() throws IOException {
     var driver = new BenchmarkDriver();
@@ -55,6 +65,8 @@ public class Main implements Callable<Integer> {
         driver.loadFile("sunspider-crypto-aes", "./SunSpider/crypto-aes.js");
         driver.loadFile("sunspider-crypto-md5", "./SunSpider/crypto-md5.js");
         driver.loadFile("sunspider-crypto-sha1", "./SunSpider/crypto-sha1.js");
+        driver.loadFile("sunspider-date-format-tofte", "./SunSpider/date-format-tofte.js");
+        driver.loadFile("sunspider-date-format-xparb", "./SunSpider/date-format-xparb.js");
         driver.loadFile("sunspider-n-body", "./SunSpider/n-body.js");
         driver.loadFile("sunspider-regex-dna", "./SunSpider/regex-dna.js");
         driver.loadFile("sunspider-string-unpack-code", "./SunSpider/string-unpack-code.js");
@@ -64,7 +76,16 @@ public class Main implements Callable<Integer> {
         driver.loadFile("octane-code-first-load", "./Octane/code-first-load.js");
         driver.loadFile("octane-crypto", "./Octane/crypto.js");
         driver.loadFile("octane-deltablue", "./Octane/deltablue.js");
+        driver.loadFile("octane-earley-boyer", "./Octane/earley-boyer.js");
+        /* Fails in a weird way:
+        driver.loadCollection("octane-gbemu", List.of("./Octane/gbemu-part1.js",
+                "./Octane/gbemu-part2.js")); */
         driver.loadFile("octane-navier-stokes", "./Octane/navier-stokes.js");
+        // Fails
+        // driver.loadFile("octane-pdfjs", "./Octane/pdfjs.js");
+        driver.loadFile("octane-raytrace", "./Octane/raytrace.js");
+        // Fails
+        // driver.loadFile("octane-regexp", "./Octane/regexp.js");
         driver.loadFile("octane-richards", "./Octane/richards.js");
 
         driver.loadFile("simple-hash-map", "./simple/hash-map.js");
@@ -143,13 +164,26 @@ public class Main implements Callable<Integer> {
       return 2;
     }
 
+    if (listTests) {
+      driver.testNames().forEach(System.out::println);
+      return 0;
+    }
+
     int maxWarmupSecs = Math.max(MIN_WARMUP, maxWarmup);
 
-    driver.dryRunAll();
-    driver.runAll(
-        Duration.ofSeconds(MIN_WARMUP),
-        Duration.ofSeconds(maxWarmupSecs),
-        Duration.ofSeconds(runTime));
+    if (singleTest != null) {
+      driver.runOne(
+          singleTest,
+          Duration.ofSeconds(MIN_WARMUP),
+          Duration.ofSeconds(maxWarmupSecs),
+          Duration.ofSeconds(runTime));
+    } else {
+      driver.dryRunAll();
+      driver.runAll(
+          Duration.ofSeconds(MIN_WARMUP),
+          Duration.ofSeconds(maxWarmupSecs),
+          Duration.ofSeconds(runTime));
+    }
 
     if (jsonOutput != null) {
       var results = new BenchmarkDriver.Results(runName, driver.results());
