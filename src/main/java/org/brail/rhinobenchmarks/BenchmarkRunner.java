@@ -69,13 +69,20 @@ public class BenchmarkRunner {
     if (!(benchmark instanceof Scriptable bo)) {
       throw new BenchmarkException("Benchmark constructor didn't construct");
     }
+    Function runFunc;
     Object runObj = ScriptableObject.getProperty(bo, "runIteration");
-    if (!(runObj instanceof Function f)) {
-      throw new BenchmarkException(
-          "Benchmark object did not have a \"runIteration\" method but " + runObj);
+    if (runObj instanceof Function f) {
+      runFunc = f;
+    } else {
+      runObj =  ScriptableObject.getProperty(bo, "run");
+      if (runObj instanceof Function f) {
+        runFunc = f;
+      } else {
+        throw new BenchmarkException("Benchmark object did not have a \"runIteration\" or a \"run\" method but " + runObj);
+      }
     }
 
-    return new BenchmarkRunner(cx, scope, bo, f);
+    return new BenchmarkRunner(cx, scope, bo, runFunc);
   }
 
   private static Scriptable makeScope(Context cx) {

@@ -12,7 +12,9 @@ SOURCES = \
 	  $(wildcard $(SRC_DIR)/simple/*.js) \
 	  $(wildcard $(SRC_DIR)/SeaMonster/*.js) \
 	  $(wildcard $(SRC_DIR)/bigint/*.js) \
-	  $(wildcard $(SRC_DIR)/threejs/*.js) 
+	  $(wildcard $(SRC_DIR)/threejs/*.js) \
+	  $(wildcard $(SRC_DIR)/WSL/*.js) 
+
 SOURCES := $(filter-out %/, $(SOURCES))
 
 LOCAL_SOURCES = $(wildcard $(THIS_DIR)/Octane/*.js)
