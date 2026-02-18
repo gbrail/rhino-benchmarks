@@ -379,6 +379,8 @@ public class Main implements Callable<Integer> {
       Files.writeString(Path.of(jsonOutput), mapper.writeValueAsString(results));
     }
 
+    driver.summarizeResults(System.out);
+
     return 0;
   }
 

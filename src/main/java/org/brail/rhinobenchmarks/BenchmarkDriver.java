@@ -1,6 +1,7 @@
 package org.brail.rhinobenchmarks;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -88,6 +89,16 @@ public class BenchmarkDriver {
 
   public List<Result> results() {
     return allResults;
+  }
+
+  public void summarizeResults(PrintStream out) {
+    allResults.stream()
+        .sorted()
+        .forEach(
+            (r) -> {
+              out.printf(
+                  "%s:\t%s\tscore: %.2f\n", r.name, Utils.formatNanos(r.average), score(r.average));
+            });
   }
 
   private static Result makeResult(String name, List<Long> timings) {

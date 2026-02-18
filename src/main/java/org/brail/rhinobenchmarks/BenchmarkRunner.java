@@ -9,12 +9,14 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 import org.mozilla.javascript.Callable;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
+import org.mozilla.javascript.LambdaFunction;
 import org.mozilla.javascript.NativePromise;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
@@ -102,7 +104,18 @@ public class BenchmarkRunner {
   private static Scriptable makeScope(Context cx) {
     var scope = cx.initStandardObjects();
     Performance.init(cx, scope);
+    setRandom(cx, scope);
     return scope;
+  }
+
+  /** Replace "math.random" with a generator with a constant seed. */
+  private static void setRandom(Context cx, Scriptable scope) {
+    Object mathObj = ScriptableObject.getProperty(scope, "Math");
+    assert mathObj instanceof Scriptable;
+    Scriptable math = (Scriptable) mathObj;
+    var rand = new Random(0);
+    var randomFunc = new LambdaFunction(scope, 1, (lcx, ls, lthis, largs) -> rand.nextDouble());
+    ScriptableObject.defineProperty(math, "random", randomFunc, 0);
   }
 
   public List<Long> run(Duration warmupMin, Duration warmupMax, Duration d) {
