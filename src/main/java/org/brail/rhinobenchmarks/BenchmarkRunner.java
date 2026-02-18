@@ -1,13 +1,17 @@
 package org.brail.rhinobenchmarks;
 
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
 import org.mozilla.javascript.Callable;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
@@ -41,9 +45,7 @@ public class BenchmarkRunner {
   public static BenchmarkRunner load(Path path) throws BenchmarkException, IOException {
     var cx = Context.enter();
     var scope = makeScope(cx);
-    try (var rdr = new FileReader(path.toFile(), StandardCharsets.UTF_8)) {
-      cx.evaluateReader(scope, rdr, path.getFileName().toString(), 1, null);
-    }
+    loadFile(cx, scope, path);
     return makeRunner(cx, scope);
   }
 
@@ -52,11 +54,22 @@ public class BenchmarkRunner {
     var cx = Context.enter();
     var scope = makeScope(cx);
     for (var file : fileNames) {
-      try (var rdr = new FileReader(file, StandardCharsets.UTF_8)) {
-        cx.evaluateReader(scope, rdr, file, 1, null);
-      }
+      loadFile(cx, scope, Path.of(file));
     }
     return makeRunner(cx, scope);
+  }
+
+  private static void loadFile(Context cx, Scriptable scope, Path path) throws IOException {
+    try (var in = new FileInputStream(path.toFile())) {
+      Reader rdr;
+      if (path.toString().endsWith(".z")) {
+        Inflater inflater = new Inflater();
+        rdr = new InputStreamReader(new InflaterInputStream(in, inflater), StandardCharsets.UTF_8);
+      } else {
+        rdr = new InputStreamReader(in, StandardCharsets.UTF_8);
+      }
+      cx.evaluateReader(scope, rdr, path.getFileName().toString(), 1, null);
+    }
   }
 
   private static BenchmarkRunner makeRunner(Context cx, Scriptable scope)
@@ -74,11 +87,12 @@ public class BenchmarkRunner {
     if (runObj instanceof Function f) {
       runFunc = f;
     } else {
-      runObj =  ScriptableObject.getProperty(bo, "run");
+      runObj = ScriptableObject.getProperty(bo, "run");
       if (runObj instanceof Function f) {
         runFunc = f;
       } else {
-        throw new BenchmarkException("Benchmark object did not have a \"runIteration\" or a \"run\" method but " + runObj);
+        throw new BenchmarkException(
+            "Benchmark object did not have a \"runIteration\" or a \"run\" method but " + runObj);
       }
     }
 
