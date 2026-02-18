@@ -103,6 +103,7 @@ public class BenchmarkDriver {
         name,
         allTimings.length,
         average,
+        score(average),
         getP(allTimings, 50),
         getP(allTimings, 90),
         getP(allTimings, 95),
@@ -115,13 +116,18 @@ public class BenchmarkDriver {
     return results[ix];
   }
 
+  private static double score(long average) {
+    return 5000.0 / ((double) average / 1000000.0);
+  }
+
   public record Result(
-      String name, int iterations, long average, long median, long p90, long p95, long max)
+      String name, int iterations, long average, double averageScore, long median, long p90, long p95, long max)
       implements Comparable<Result> {
     public void print() {
       System.out.println("  Name:       " + name);
       System.out.println("  Iterations: " + iterations);
       System.out.println("  Average:    " + Utils.formatNanos(average));
+      System.out.println("  Score:      " + String.format(".%2f", averageScore));
       System.out.println("  Median:     " + Utils.formatNanos(median));
       System.out.println("  P90:        " + Utils.formatNanos(p90));
       System.out.println("  P95:        " + Utils.formatNanos(p95));
