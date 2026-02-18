@@ -59,6 +59,7 @@ public class Main implements Callable<Integer> {
       if (testFileName != null) {
         driver.loadFile(testFileName, testFileName);
       } else {
+        // TODO "deterministicRandom" for most benchmarks
         driver.loadFile("sunspider-3d-cube", "./SunSpider/3d-cube.js");
         driver.loadFile("sunspider-3d-raytrace", "./SunSpider/3d-raytrace.js");
         driver.loadFile("sunspider-base64", "./SunSpider/base64.js");
@@ -92,6 +93,7 @@ public class Main implements Callable<Integer> {
         driver.loadFile("simple-doxbee-promise", "./simple/doxbee-promise.js");
         driver.loadFile("simple-doxbee-async", "./simple/doxbee-async.js");
 
+        // TODO 60 iterations
         driver.loadCollection(
             "cdjs",
             List.of(
@@ -108,6 +110,8 @@ public class Main implements Callable<Integer> {
                 "./cdjs/collision_detector.js",
                 "./cdjs/benchmark.js"));
 
+        // TODO implement support for .z files and support FlightPlanner
+
         driver.loadCollection(
             "RexBench-UniPoker",
             List.of(
@@ -115,6 +119,7 @@ public class Main implements Callable<Integer> {
                 "./RexBench/UniPoker/expected.js",
                 "./RexBench/UniPoker/benchmark.js"));
 
+        // TODO 80 iterations
         driver.loadCollection(
             "RexBench-OfflineAssembler",
             List.of(
@@ -130,6 +135,7 @@ public class Main implements Callable<Integer> {
                 "./RexBench/OfflineAssembler/expected.js",
                 "./RexBench/OfflineAssembler/benchmark.js"));
 
+        // TODO Iterations: 160
         driver.loadCollection(
             "bigint-bigdenary",
             List.of("./bigint/bigdenary-bundle.js", "./bigint/bigdenary-benchmark.js"));
@@ -158,6 +164,18 @@ public class Main implements Callable<Integer> {
                 "./ARES-6/Air/payload-airjs-ACLj8C.js",
                 "./ARES-6/Air/payload-typescript-scanIdentifier.js",
                 "./ARES-6/Air/benchmark.js"));
+        // ARES-6-Basic: Stack overflow
+        // ARES-6-ml: Missing "set"
+        /*driver.loadCollection("ARES-6-ml", List.of("./ARES-6/ml/index.js",
+        "./ARES-6/ml/benchmark.js"));*/
+        // ARES-6-Babylon: Missing TmpBase
+
+        // ai-astar: Weird assertion error, maybe too big?
+        // gaussian-blur: IllegalStateException on activation
+        // other SeaMonster crypto tests: Same IllegalStateException as above
+        // TODO Other SeaMonster tests: Require support for .z files
+
+        driver.loadCollection("threejs", List.of("./threejs/three.js", "./threejs/benchmark.js"));
       }
     } catch (BenchmarkException | IOException e) {
       System.out.println("Can't load benchmarks: " + e);

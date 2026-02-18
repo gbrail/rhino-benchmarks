@@ -5,11 +5,14 @@ THIS_DIR = $(realpath .)
 SOURCES = \
 	  $(wildcard $(SRC_DIR)/SunSpider/*.js) \
 	  $(wildcard $(SRC_DIR)/ARES-6/Air/*.js) \
+	  $(wildcard $(SRC_DIR)/ARES-6/ml/*.js) \
 	  $(wildcard $(SRC_DIR)/cdjs/*.js) \
 	  $(wildcard $(SRC_DIR)/RexBench/UniPoker/*.js) \
 	  $(wildcard $(SRC_DIR)/RexBench/OfflineAssembler/*.js) \
 	  $(wildcard $(SRC_DIR)/simple/*.js) \
-	  $(wildcard $(SRC_DIR)/bigint/*.js) 
+	  $(wildcard $(SRC_DIR)/SeaMonster/*.js) \
+	  $(wildcard $(SRC_DIR)/bigint/*.js) \
+	  $(wildcard $(SRC_DIR)/threejs/*.js) 
 SOURCES := $(filter-out %/, $(SOURCES))
 
 LOCAL_SOURCES = $(wildcard $(THIS_DIR)/Octane/*.js)

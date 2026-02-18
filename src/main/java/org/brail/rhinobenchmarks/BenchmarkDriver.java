@@ -25,6 +25,7 @@ public class BenchmarkDriver {
       benchmarks.put(name, runner);
     } catch (BenchmarkException | RhinoException | IllegalStateException e) {
       System.out.println("WARNING: Skipping " + fileName + ": " + e);
+      e.printStackTrace(System.out);
     }
   }
 
@@ -121,13 +122,20 @@ public class BenchmarkDriver {
   }
 
   public record Result(
-      String name, int iterations, long average, double averageScore, long median, long p90, long p95, long max)
+      String name,
+      int iterations,
+      long average,
+      double averageScore,
+      long median,
+      long p90,
+      long p95,
+      long max)
       implements Comparable<Result> {
     public void print() {
       System.out.println("  Name:       " + name);
       System.out.println("  Iterations: " + iterations);
       System.out.println("  Average:    " + Utils.formatNanos(average));
-      System.out.println("  Score:      " + String.format(".%2f", averageScore));
+      System.out.println("  Score:      " + String.format("%.2f", averageScore));
       System.out.println("  Median:     " + Utils.formatNanos(median));
       System.out.println("  P90:        " + Utils.formatNanos(p90));
       System.out.println("  P95:        " + Utils.formatNanos(p95));
