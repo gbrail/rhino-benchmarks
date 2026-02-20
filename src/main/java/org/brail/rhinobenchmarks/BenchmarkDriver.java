@@ -54,6 +54,14 @@ public class BenchmarkDriver {
     }
   }
 
+  public void dryRunOne(String name) {
+    var test = benchmarks.get(name);
+    if (test == null) {
+      throw new IllegalArgumentException("No benchmark named " + name);
+    }
+    test.runOnce();
+  }
+
   /**
    * Run each benchmark. First it will be run between "warmupMin" and "warmupMax" time until five
    * ierations in a row produce a relatively consistent result. Then, it will be run for "d" time
@@ -85,6 +93,10 @@ public class BenchmarkDriver {
 
   public Collection<String> testNames() {
     return benchmarks.keySet();
+  }
+
+  public BenchmarkRunner runner(String testName) {
+    return benchmarks.get(testName);
   }
 
   public List<Result> results() {

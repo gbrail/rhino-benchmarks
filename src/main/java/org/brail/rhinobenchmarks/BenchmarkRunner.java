@@ -104,12 +104,12 @@ public class BenchmarkRunner {
   private static Scriptable makeScope(Context cx) {
     var scope = cx.initStandardObjects();
     Performance.init(cx, scope);
-    setRandom(cx, scope);
+    setRandom(scope);
     return scope;
   }
 
   /** Replace "math.random" with a generator with a constant seed. */
-  private static void setRandom(Context cx, Scriptable scope) {
+  private static void setRandom(Scriptable scope) {
     Object mathObj = ScriptableObject.getProperty(scope, "Math");
     assert mathObj instanceof Scriptable;
     Scriptable math = (Scriptable) mathObj;

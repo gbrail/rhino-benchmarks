@@ -6,4 +6,4 @@ then
   out=$1
 fi
 
-./gradlew run -q --console=plain --args="-j ${out}"
+./gradlew run -q --console=plain --args="$*"
