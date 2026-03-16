@@ -26,12 +26,12 @@ public class StandardBenchmarks {
     driver.loadFile("octane-earley-boyer", "./Octane/earley-boyer.js");
     /* Fails in a weird way:
     driver.loadCollection("octane-gbemu", List.of("./Octane/gbemu-part1.js",
-            "./Octane/gbemu-part2.js")); */
+            "./Octane/gbemu-part2.js"));*/
     driver.loadFile("octane-navier-stokes", "./Octane/navier-stokes.js");
     // Fails
-    // driver.loadFile("octane-pdfjs", "./Octane/pdfjs.js");
+    driver.loadFile("octane-pdfjs", "./Octane/pdfjs.js");
     driver.loadFile("octane-raytrace", "./Octane/raytrace.js");
-    // Fails
+    // Checksum error -- might be a real bug?
     // driver.loadFile("octane-regexp", "./Octane/regexp.js");
     driver.loadFile("octane-richards", "./Octane/richards.js");
 
@@ -57,7 +57,7 @@ public class StandardBenchmarks {
             "./cdjs/benchmark.js"));
 
     driver.loadCollection(
-        "RexBench-UniPoker",
+        "rexbench-UniPoker",
         List.of(
             "./RexBench/UniPoker/poker.js",
             "./RexBench/UniPoker/expected.js",
@@ -65,7 +65,7 @@ public class StandardBenchmarks {
 
     // TODO 80 iterations
     driver.loadCollection(
-        "RexBench-OfflineAssembler",
+        "rexbench-OfflineAssembler",
         List.of(
             "./RexBench/OfflineAssembler/registers.js",
             "./RexBench/OfflineAssembler/instructions.js",
@@ -80,7 +80,7 @@ public class StandardBenchmarks {
             "./RexBench/OfflineAssembler/benchmark.js"));
 
     driver.loadCollection(
-        "RexBench-FlightPlanner",
+        "rexbench-FlightPlanner",
         List.of(
             "./RexBench/FlightPlanner/airways.js",
             "./RexBench/FlightPlanner/waypoints.js.z",
@@ -123,18 +123,26 @@ public class StandardBenchmarks {
     "./ARES-6/ml/benchmark.js"));*/
     // ARES-6-Babylon: Missing TmpBase
 
-    // ai-astar: Weird assertion error, maybe too big?
-    // gaussian-blur: IllegalStateException on activation
-    // other SeaMonster crypto tests: Same IllegalStateException as above
+    driver.loadFile("seamonster-ai-astar", "./SeaMonster/ai-astar.js");
+    driver.loadFile("seamonster-gaussian-blur", "./SeaMonster/gaussian-blur.js");
+    driver.loadCollection(
+        "seamonster-crypto-aes",
+        List.of("./SeaMonster/sjlc.js", "./SeaMonster/stanford-crypto-aes.js"));
+    driver.loadCollection(
+        "seamonster-crypto-sha256",
+        List.of("./SeaMonster/sjlc.js", "./SeaMonster/stanford-crypto-sha256.js"));
+    driver.loadCollection(
+        "seamonster-crypto-pbkdf2",
+        List.of("./SeaMonster/sjlc.js", "./SeaMonster/stanford-crypto-pbkdf2.js"));
 
     // TODO 20 iterations for the next two
     driver.loadCollection(
-        "SeaMonster-json-stringify",
+        "seamonster-json-stringify",
         List.of(
             "./SeaMonster/inspector-json-payload.js.z",
             "./SeaMonster/json-stringify-inspector.js"));
     driver.loadCollection(
-        "SeaMonster-json-parse",
+        "seamonster-json-parse",
         List.of(
             "./SeaMonster/inspector-json-payload.js.z", "./SeaMonster/json-parse-inspector.js"));
 
