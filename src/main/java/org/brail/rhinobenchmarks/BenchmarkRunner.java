@@ -28,9 +28,7 @@ import org.mozilla.javascript.ScriptableObject;
 public class BenchmarkRunner {
   private static final ContextFactory CONTEXT_FACTORY = new BenchmarkContextFactory();
 
-  private final Scriptable scope;
-  private final Scriptable benchmark;
-  private final Callable run;
+  private final List<Path> files;
 
   @SuppressWarnings("unused")
   public static volatile Object blackhole;
@@ -41,29 +39,28 @@ public class BenchmarkRunner {
   // 100 milliseconds
   private static final long QUICK_BENCHMARK = 100 * 1000000;
 
-  private BenchmarkRunner(Scriptable scope, Scriptable benchmark, Callable run) {
-    this.scope = scope;
-    this.benchmark = benchmark;
-    this.run = run;
+  private record RunArgs(Scriptable scope, Scriptable thisObj, Callable run) {}
+
+  private BenchmarkRunner(List<Path> files) {
+    this.files = files;
   }
 
   public static BenchmarkRunner load(Path path) throws BenchmarkException, IOException {
-    try (var cx = CONTEXT_FACTORY.enterContext()) {
-      var scope = makeScope(cx);
-      loadFile(cx, scope, path);
-      return makeRunner(cx, scope);
+    if (!path.toFile().exists()) {
+      throw new IOException("Not found: " + path);
     }
+    return new BenchmarkRunner(List.of(path));
   }
 
   public static BenchmarkRunner load(List<String> fileNames)
       throws BenchmarkException, IOException {
-    try (var cx = CONTEXT_FACTORY.enterContext()) {
-      var scope = makeScope(cx);
-      for (var file : fileNames) {
-        loadFile(cx, scope, Path.of(file));
+    var paths = fileNames.stream().map(Path::of).toList();
+    for (var p : paths) {
+      if (!p.toFile().exists()) {
+        throw new IOException("Not found: " + p);
       }
-      return makeRunner(cx, scope);
     }
+    return new BenchmarkRunner(paths);
   }
 
   private static void loadFile(Context cx, Scriptable scope, Path path) throws IOException {
@@ -79,8 +76,12 @@ public class BenchmarkRunner {
     }
   }
 
-  private static BenchmarkRunner makeRunner(Context cx, Scriptable scope)
-      throws BenchmarkException {
+  private RunArgs initialize(Context cx) throws BenchmarkException, IOException {
+    var scope = makeScope(cx);
+    for (var p : files) {
+      loadFile(cx, scope, p);
+    }
+
     Object benchmarkObj = ScriptableObject.getProperty(scope, "Benchmark");
     if (!(benchmarkObj instanceof Function cons)) {
       throw new BenchmarkException("Script did not create \"Benchmark\" object");
@@ -103,7 +104,7 @@ public class BenchmarkRunner {
       }
     }
 
-    return new BenchmarkRunner(scope, bo, runFunc);
+    return new RunArgs(scope, bo, runFunc);
   }
 
   private static Scriptable makeScope(Context cx) {
@@ -136,15 +137,18 @@ public class BenchmarkRunner {
     ScriptableObject.defineProperty(math, "random", randomFunc, 0);
   }
 
-  public long dryRun() {
+  public long dryRun() throws IOException, BenchmarkException {
     try (var cx = CONTEXT_FACTORY.enterContext()) {
-      return runOnce(cx);
+      var a = initialize(cx);
+      return runOnce(cx, a);
     }
   }
 
-  public List<Long> run(Duration warmupMin, Duration warmupMax, Duration d) {
+  public List<Long> run(Duration warmupMin, Duration warmupMax, Duration d)
+      throws IOException, BenchmarkException {
     try (var cx = CONTEXT_FACTORY.enterContext()) {
-      warmUp(cx, warmupMin, warmupMax);
+      var a = initialize(cx);
+      warmUp(cx, a, warmupMin, warmupMax);
       ArrayList<Long> results = null;
       double variance = 0;
       for (int i = 0; i < MAX_RERUNS; i++) {
@@ -152,7 +156,7 @@ public class BenchmarkRunner {
         long start = System.currentTimeMillis();
         long end = start + d.toMillis();
         while (System.currentTimeMillis() < end) {
-          long t = runOnce(cx);
+          long t = runOnce(cx, a);
           results.add(t);
         }
         variance = Utils.calculateVariance(results);
@@ -167,24 +171,24 @@ public class BenchmarkRunner {
     }
   }
 
-  public long runOnce(Context cx) {
+  private long runOnce(Context cx, RunArgs r) {
     long nanoStart = System.nanoTime();
-    Object result = run.call(cx, scope, benchmark, ScriptRuntime.emptyArgs);
+    Object result = r.run.call(cx, r.scope, r.thisObj, ScriptRuntime.emptyArgs);
     long nanoEnd = System.nanoTime();
     if (result instanceof NativePromise p) {
-      waitForPromise(cx, p);
+      waitForPromise(cx, r, p);
       nanoEnd = System.nanoTime();
     }
     blackhole = result;
     return nanoEnd - nanoStart;
   }
 
-  private void waitForPromise(Context cx, NativePromise p) {
+  private void waitForPromise(Context cx, RunArgs r, NativePromise p) {
     var wrapper = new PromiseWrapper(p);
     var resolved = new AtomicBoolean();
     wrapper.then(
         cx,
-        scope,
+        r.scope,
         (lcx, ls, v) -> resolved.set(true),
         (lcx, ls, e) -> {
           throw new RuntimeException("Unexpected promise rejection: " + e);
@@ -195,13 +199,13 @@ public class BenchmarkRunner {
     }
   }
 
-  public void warmUp(Context cx, Duration warmupMin, Duration warmupMax) {
+  private void warmUp(Context cx, RunArgs r, Duration warmupMin, Duration warmupMax) {
     long now = System.currentTimeMillis();
     long endMin = now + warmupMin.toMillis();
     long end = now + warmupMax.toMillis();
     List<Long> previousBatch = null;
     List<Long> batch;
-    long firstTime = runOnce(cx);
+    long firstTime = runOnce(cx, r);
     int warmupBatch = WARMUP_BATCH;
     // Larger batches for faster benchmarks
     if (firstTime < QUICK_BENCHMARK) {
@@ -210,7 +214,7 @@ public class BenchmarkRunner {
     while (System.currentTimeMillis() < end) {
       batch = new ArrayList<>(warmupBatch);
       for (int j = 0; j < warmupBatch; j++) {
-        long elapsed = runOnce(cx);
+        long elapsed = runOnce(cx, r);
         batch.add(elapsed);
       }
       double batchVariance = Utils.calculateVariance(batch);

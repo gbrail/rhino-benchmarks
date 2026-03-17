@@ -46,7 +46,7 @@ public class BenchmarkDriver {
   }
 
   /** Run each benchmark's "runIteration" method once. */
-  public void dryRunAll() {
+  public void dryRunAll() throws BenchmarkException, IOException {
     for (var e : benchmarks.entrySet()) {
       System.out.print(e.getKey() + "...");
       e.getValue().dryRun();
@@ -54,7 +54,7 @@ public class BenchmarkDriver {
     }
   }
 
-  public void dryRunOne(String name) {
+  public void dryRunOne(String name) throws BenchmarkException, IOException {
     var test = benchmarks.get(name);
     if (test == null) {
       throw new IllegalArgumentException("No benchmark named " + name);
@@ -68,7 +68,8 @@ public class BenchmarkDriver {
    * and all the results will be gathered. If the variation between results is too great, it will
    * retry the run.
    */
-  public void runAll(Duration warmupMin, Duration warmupMax, Duration d) {
+  public void runAll(Duration warmupMin, Duration warmupMax, Duration d)
+      throws BenchmarkException, IOException {
     for (var e : benchmarks.entrySet()) {
       System.out.println(e.getKey() + "...");
       var timings = e.getValue().run(warmupMin, warmupMax, d);
@@ -79,7 +80,8 @@ public class BenchmarkDriver {
   }
 
   /** Run just one benchmark. */
-  public void runOne(String name, Duration warmupMin, Duration warmupMax, Duration d) {
+  public void runOne(String name, Duration warmupMin, Duration warmupMax, Duration d)
+      throws BenchmarkException, IOException {
     var test = benchmarks.get(name);
     if (test == null) {
       System.out.println("No benchmark named \"" + name + "\"");

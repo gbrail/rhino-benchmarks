@@ -15,7 +15,7 @@ public class Main implements Callable<Integer> {
   private static final String DEFAULT_RUN_TIME = "5";
 
   @CommandLine.Option(
-      names = {"-n", "--name"},
+      names = {"--name"},
       description = "A name to put on the output")
   private String runName;
 
@@ -28,6 +28,11 @@ public class Main implements Callable<Integer> {
       names = {"-1", "--test"},
       description = "Run the single test with the specified name")
   private String singleTest;
+
+  @CommandLine.Option(
+      names = {"-n", "--dry-run"},
+      description = "Just dry run each benchmark")
+  private boolean dryRun;
 
   @CommandLine.Option(
       names = {"-j", "--json"},
@@ -72,18 +77,24 @@ public class Main implements Callable<Integer> {
 
     int maxWarmupSecs = Math.max(MIN_WARMUP, maxWarmup);
 
-    if (singleTest != null) {
-      driver.runOne(
-          singleTest,
-          Duration.ofSeconds(MIN_WARMUP),
-          Duration.ofSeconds(maxWarmupSecs),
-          Duration.ofSeconds(runTime));
-    } else {
-      driver.dryRunAll();
-      driver.runAll(
-          Duration.ofSeconds(MIN_WARMUP),
-          Duration.ofSeconds(maxWarmupSecs),
-          Duration.ofSeconds(runTime));
+    try {
+      if (singleTest != null) {
+        driver.runOne(
+            singleTest,
+            Duration.ofSeconds(MIN_WARMUP),
+            Duration.ofSeconds(maxWarmupSecs),
+            Duration.ofSeconds(runTime));
+      } else if (dryRun) {
+        driver.dryRunAll();
+      } else {
+        driver.runAll(
+            Duration.ofSeconds(MIN_WARMUP),
+            Duration.ofSeconds(maxWarmupSecs),
+            Duration.ofSeconds(runTime));
+      }
+    } catch (BenchmarkException | IOException e) {
+      System.out.println("Can't load benchmarks: " + e);
+      return 2;
     }
 
     if (jsonOutput != null) {

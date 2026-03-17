@@ -24,7 +24,7 @@ class StandardBenchmarkTest {
 
   @ParameterizedTest
   @MethodSource("benchmarkProvider")
-  void benchmark(String benchmarkName) {
+  void benchmark(String benchmarkName) throws BenchmarkException, IOException {
     driver.dryRunOne(benchmarkName);
   }
 }
