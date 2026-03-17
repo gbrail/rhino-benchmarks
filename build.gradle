@@ -39,6 +39,15 @@ tasks.register('printDependencies') {
     }
 }
 
+// This task makes it easier to write other command-line apps
+tasks.register('printClassPath') {
+    def cp = sourceSets.main.runtimeClasspath
+    inputs.files(cp)
+    doLast {
+        println cp.asPath
+    }
+}
+
 application {
     mainClass = 'org.brail.rhinobenchmarks.Main'
     applicationDefaultJvmArgs = [

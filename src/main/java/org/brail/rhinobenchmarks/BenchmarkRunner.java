@@ -11,19 +11,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 import org.mozilla.javascript.Callable;
 import org.mozilla.javascript.Context;
+import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.LambdaFunction;
+import org.mozilla.javascript.NativeConsole;
 import org.mozilla.javascript.NativePromise;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
 public class BenchmarkRunner {
-  private final Context cx;
+  private static final ContextFactory CONTEXT_FACTORY = new BenchmarkContextFactory();
+
   private final Scriptable scope;
   private final Scriptable benchmark;
   private final Callable run;
@@ -37,28 +41,29 @@ public class BenchmarkRunner {
   // 100 milliseconds
   private static final long QUICK_BENCHMARK = 100 * 1000000;
 
-  private BenchmarkRunner(Context cx, Scriptable scope, Scriptable benchmark, Callable run) {
-    this.cx = cx;
+  private BenchmarkRunner(Scriptable scope, Scriptable benchmark, Callable run) {
     this.scope = scope;
     this.benchmark = benchmark;
     this.run = run;
   }
 
   public static BenchmarkRunner load(Path path) throws BenchmarkException, IOException {
-    var cx = Context.enter();
-    var scope = makeScope(cx);
-    loadFile(cx, scope, path);
-    return makeRunner(cx, scope);
+    try (var cx = CONTEXT_FACTORY.enterContext()) {
+      var scope = makeScope(cx);
+      loadFile(cx, scope, path);
+      return makeRunner(cx, scope);
+    }
   }
 
   public static BenchmarkRunner load(List<String> fileNames)
       throws BenchmarkException, IOException {
-    var cx = Context.enter();
-    var scope = makeScope(cx);
-    for (var file : fileNames) {
-      loadFile(cx, scope, Path.of(file));
+    try (var cx = CONTEXT_FACTORY.enterContext()) {
+      var scope = makeScope(cx);
+      for (var file : fileNames) {
+        loadFile(cx, scope, Path.of(file));
+      }
+      return makeRunner(cx, scope);
     }
-    return makeRunner(cx, scope);
   }
 
   private static void loadFile(Context cx, Scriptable scope, Path path) throws IOException {
@@ -98,11 +103,24 @@ public class BenchmarkRunner {
       }
     }
 
-    return new BenchmarkRunner(cx, scope, bo, runFunc);
+    return new BenchmarkRunner(scope, bo, runFunc);
   }
 
   private static Scriptable makeScope(Context cx) {
     var scope = cx.initStandardObjects();
+    NativeConsole.init(
+        scope,
+        false,
+        (NativeConsole.ConsolePrinter)
+            (cx1, scope1, level, args, stack) -> {
+              if (args.length == 1) {
+                System.out.println(args[0].toString());
+              } else {
+                System.out.println(
+                    String.join(
+                        ", ", Stream.of(args).map(Object::toString).toArray(String[]::new)));
+              }
+            });
     Performance.init(cx, scope);
     setRandom(scope);
     return scope;
@@ -118,42 +136,50 @@ public class BenchmarkRunner {
     ScriptableObject.defineProperty(math, "random", randomFunc, 0);
   }
 
-  public List<Long> run(Duration warmupMin, Duration warmupMax, Duration d) {
-    warmUp(warmupMin, warmupMax);
-    ArrayList<Long> results = null;
-    double variance = 0;
-    for (int i = 0; i < MAX_RERUNS; i++) {
-      results = new ArrayList<>();
-      long start = System.currentTimeMillis();
-      long end = start + d.toMillis();
-      while (System.currentTimeMillis() < end) {
-        long t = runOnce();
-        results.add(t);
-      }
-      variance = Utils.calculateVariance(results);
-      if (variance <= GOOD_VARIANCE) {
-        return results;
-      } else if (i < (MAX_RERUNS - 1)) {
-        System.out.printf("Re-running because variance is %.2f\n", variance);
-      }
+  public long dryRun() {
+    try (var cx = CONTEXT_FACTORY.enterContext()) {
+      return runOnce(cx);
     }
-    System.out.printf("WARNING: Too much variance: %.2f\n", variance);
-    return results;
   }
 
-  public long runOnce() {
+  public List<Long> run(Duration warmupMin, Duration warmupMax, Duration d) {
+    try (var cx = CONTEXT_FACTORY.enterContext()) {
+      warmUp(cx, warmupMin, warmupMax);
+      ArrayList<Long> results = null;
+      double variance = 0;
+      for (int i = 0; i < MAX_RERUNS; i++) {
+        results = new ArrayList<>();
+        long start = System.currentTimeMillis();
+        long end = start + d.toMillis();
+        while (System.currentTimeMillis() < end) {
+          long t = runOnce(cx);
+          results.add(t);
+        }
+        variance = Utils.calculateVariance(results);
+        if (variance <= GOOD_VARIANCE) {
+          return results;
+        } else if (i < (MAX_RERUNS - 1)) {
+          System.out.printf("Re-running because variance is %.2f\n", variance);
+        }
+      }
+      System.out.printf("WARNING: Too much variance: %.2f\n", variance);
+      return results;
+    }
+  }
+
+  public long runOnce(Context cx) {
     long nanoStart = System.nanoTime();
     Object result = run.call(cx, scope, benchmark, ScriptRuntime.emptyArgs);
     long nanoEnd = System.nanoTime();
     if (result instanceof NativePromise p) {
-      waitForPromise(p);
+      waitForPromise(cx, p);
       nanoEnd = System.nanoTime();
     }
     blackhole = result;
     return nanoEnd - nanoStart;
   }
 
-  private void waitForPromise(NativePromise p) {
+  private void waitForPromise(Context cx, NativePromise p) {
     var wrapper = new PromiseWrapper(p);
     var resolved = new AtomicBoolean();
     wrapper.then(
@@ -169,13 +195,13 @@ public class BenchmarkRunner {
     }
   }
 
-  public void warmUp(Duration warmupMin, Duration warmupMax) {
+  public void warmUp(Context cx, Duration warmupMin, Duration warmupMax) {
     long now = System.currentTimeMillis();
     long endMin = now + warmupMin.toMillis();
     long end = now + warmupMax.toMillis();
     List<Long> previousBatch = null;
     List<Long> batch;
-    long firstTime = runOnce();
+    long firstTime = runOnce(cx);
     int warmupBatch = WARMUP_BATCH;
     // Larger batches for faster benchmarks
     if (firstTime < QUICK_BENCHMARK) {
@@ -184,7 +210,7 @@ public class BenchmarkRunner {
     while (System.currentTimeMillis() < end) {
       batch = new ArrayList<>(warmupBatch);
       for (int j = 0; j < warmupBatch; j++) {
-        long elapsed = runOnce();
+        long elapsed = runOnce(cx);
         batch.add(elapsed);
       }
       double batchVariance = Utils.calculateVariance(batch);
@@ -204,5 +230,15 @@ public class BenchmarkRunner {
       previousBatch = batch;
     }
     System.out.printf("Never got to <%.2f in %d seconds\n", GOOD_VARIANCE, warmupMax.toSeconds());
+  }
+
+  private static class BenchmarkContextFactory extends ContextFactory {
+    @Override
+    protected void onContextCreated(Context cx) {
+      cx.setLanguageVersion(Context.VERSION_ECMASCRIPT);
+      // cx.setGeneratingDebug(true);
+      // cx.setInterpretedMode(false);
+      super.onContextCreated(cx);
+    }
   }
 }

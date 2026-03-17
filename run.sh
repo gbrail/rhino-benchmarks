@@ -1,9 +1,11 @@
 #!/bin/sh
 
-out=result.json
-if [ $# -eq 1 ]
-then
-  out=$1
-fi
+export CLASSPATH=$(./gradlew -q printClasspath)
 
-./gradlew run -q --console=plain --args="$*"
+java \
+	-XX:MaxGCPauseMillis=50 \
+        -XX:-TieredCompilation \
+        -Xms4G \
+        -Xmx4G \
+        -Xbatch \
+	org.brail.rhinobenchmarks.Main $*

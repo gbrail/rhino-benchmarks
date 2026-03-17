@@ -49,7 +49,7 @@ public class BenchmarkDriver {
   public void dryRunAll() {
     for (var e : benchmarks.entrySet()) {
       System.out.print(e.getKey() + "...");
-      e.getValue().runOnce();
+      e.getValue().dryRun();
       System.out.println("OK");
     }
   }
@@ -59,7 +59,7 @@ public class BenchmarkDriver {
     if (test == null) {
       throw new IllegalArgumentException("No benchmark named " + name);
     }
-    test.runOnce();
+    test.dryRun();
   }
 
   /**
