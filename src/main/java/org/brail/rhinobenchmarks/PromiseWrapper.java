@@ -7,6 +7,7 @@ import org.mozilla.javascript.NativePromise;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Undefined;
+import org.mozilla.javascript.VarScope;
 
 /** PromiseWrapper adapts a Rhino Promise so that we can take action when it is resolved. */
 public class PromiseWrapper {
@@ -21,7 +22,7 @@ public class PromiseWrapper {
   }
 
   /** Register a callback that will be called when the promise resolves. */
-  public Object then(Context cx, Scriptable scope, ResultCallback cb) {
+  public Object then(Context cx, VarScope scope, ResultCallback cb) {
     var resolve =
         new LambdaFunction(
             scope,
@@ -38,7 +39,7 @@ public class PromiseWrapper {
 
   /** Register a callback that will be called when the promise resolves. */
   public Object then(
-      Context cx, Scriptable scope, ResultCallback resolveCb, ResultCallback rejectCb) {
+      Context cx, VarScope scope, ResultCallback resolveCb, ResultCallback rejectCb) {
     var resolve =
         new LambdaFunction(
             scope,

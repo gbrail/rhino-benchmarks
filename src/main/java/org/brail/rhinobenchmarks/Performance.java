@@ -10,13 +10,14 @@ import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Undefined;
+import org.mozilla.javascript.VarScope;
 
 public class Performance extends ScriptableObject {
   private long timeOrigin;
   private final HashMap<String, List<Scriptable>> marks = new HashMap<>();
   private final HashMap<String, List<Scriptable>> measures = new HashMap<>();
 
-  public static void init(Context cx, Scriptable scope) {
+  public static void init(Context cx, VarScope scope) {
     var cons = new LambdaConstructor(scope, "performance", 0, Performance::constructor);
     cons.definePrototypeProperty(
         cx, "timeOrigin", Performance::timeOrigin, Performance::setTimeOrigin);
@@ -40,7 +41,7 @@ public class Performance extends ScriptableObject {
     return "Performance";
   }
 
-  private static Scriptable constructor(Context cx, Scriptable scope, Object[] args) {
+  private static Scriptable constructor(Context cx, VarScope scope, Object[] args) {
     return new Performance();
   }
 
@@ -55,12 +56,12 @@ public class Performance extends ScriptableObject {
     self.timeOrigin = doubleToTimestamp(d);
   }
 
-  private static Object now(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+  private static Object now(Context cx, VarScope scope, Scriptable thisObj, Object[] args) {
     var self = LambdaConstructor.convertThisObject(thisObj, Performance.class);
     return timestampToDouble(self.timeNow());
   }
 
-  private static Object mark(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+  private static Object mark(Context cx, VarScope scope, Scriptable thisObj, Object[] args) {
     var name = requiredStringArg(args, 0, "name");
     var self = LambdaConstructor.convertThisObject(thisObj, Performance.class);
     var entry = makeEntry(cx, scope, name, "mark", self.timeNow(), 0);
@@ -77,8 +78,7 @@ public class Performance extends ScriptableObject {
     return Undefined.instance;
   }
 
-  private static Object clearMarks(
-      Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+  private static Object clearMarks(Context cx, VarScope scope, Scriptable thisObj, Object[] args) {
     var name = stringArg(args, 0);
     var self = LambdaConstructor.convertThisObject(thisObj, Performance.class);
     if (name.isPresent()) {
@@ -89,7 +89,7 @@ public class Performance extends ScriptableObject {
     return Undefined.instance;
   }
 
-  private static Object measure(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+  private static Object measure(Context cx, VarScope scope, Scriptable thisObj, Object[] args) {
     var name = requiredStringArg(args, 0, "name");
     var startMark = stringArg(args, 1);
     var endMark = stringArg(args, 2);
@@ -111,7 +111,7 @@ public class Performance extends ScriptableObject {
   }
 
   private static Object clearMeasures(
-      Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+      Context cx, VarScope scope, Scriptable thisObj, Object[] args) {
     var name = stringArg(args, 0);
     var self = LambdaConstructor.convertThisObject(thisObj, Performance.class);
     if (name.isPresent()) {
@@ -122,8 +122,7 @@ public class Performance extends ScriptableObject {
     return Undefined.instance;
   }
 
-  private static Object getEntries(
-      Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+  private static Object getEntries(Context cx, VarScope scope, Scriptable thisObj, Object[] args) {
     var entries = new ArrayList<>();
     var self = LambdaConstructor.convertThisObject(thisObj, Performance.class);
     entries.addAll(self.marks.values());
@@ -132,7 +131,7 @@ public class Performance extends ScriptableObject {
   }
 
   private static Object getEntriesByType(
-      Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+      Context cx, VarScope scope, Scriptable thisObj, Object[] args) {
     var type = requiredStringArg(args, 0, "type");
     var self = LambdaConstructor.convertThisObject(thisObj, Performance.class);
     if ("mark".equals(type)) {
@@ -145,7 +144,7 @@ public class Performance extends ScriptableObject {
   }
 
   private static Scriptable makeEntry(
-      Context cx, Scriptable scope, String name, String type, long start, long duration) {
+      Context cx, VarScope scope, String name, String type, long start, long duration) {
     var e = cx.newObject(scope);
     e.put("name", e, name);
     e.put("entryType", e, type);

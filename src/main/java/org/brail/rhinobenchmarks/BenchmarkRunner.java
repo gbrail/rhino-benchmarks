@@ -24,6 +24,7 @@ import org.mozilla.javascript.NativePromise;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.VarScope;
 
 public class BenchmarkRunner {
   private static final ContextFactory CONTEXT_FACTORY = new BenchmarkContextFactory();
@@ -39,7 +40,7 @@ public class BenchmarkRunner {
   // 100 milliseconds
   private static final long QUICK_BENCHMARK = 100 * 1000000;
 
-  private record RunArgs(Scriptable scope, Scriptable thisObj, Callable run) {}
+  private record RunArgs(VarScope scope, Scriptable thisObj, Callable run) {}
 
   private BenchmarkRunner(List<Path> files) {
     this.files = files;
@@ -63,7 +64,7 @@ public class BenchmarkRunner {
     return new BenchmarkRunner(paths);
   }
 
-  private static void loadFile(Context cx, Scriptable scope, Path path) throws IOException {
+  private static void loadFile(Context cx, VarScope scope, Path path) throws IOException {
     try (var in = new FileInputStream(path.toFile())) {
       Reader rdr;
       if (path.toString().endsWith(".z")) {
@@ -107,7 +108,7 @@ public class BenchmarkRunner {
     return new RunArgs(scope, bo, runFunc);
   }
 
-  private static Scriptable makeScope(Context cx) {
+  private static VarScope makeScope(Context cx) {
     var scope = cx.initStandardObjects();
     NativeConsole.init(
         scope,
@@ -128,7 +129,7 @@ public class BenchmarkRunner {
   }
 
   /** Replace "math.random" with a generator with a constant seed. */
-  private static void setRandom(Scriptable scope) {
+  private static void setRandom(VarScope scope) {
     Object mathObj = ScriptableObject.getProperty(scope, "Math");
     assert mathObj instanceof Scriptable;
     Scriptable math = (Scriptable) mathObj;
