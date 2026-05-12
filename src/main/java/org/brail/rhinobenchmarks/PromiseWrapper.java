@@ -4,7 +4,6 @@ import org.mozilla.javascript.Callable;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.LambdaFunction;
 import org.mozilla.javascript.NativePromise;
-import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Undefined;
 import org.mozilla.javascript.VarScope;
@@ -14,7 +13,7 @@ public class PromiseWrapper {
   private final NativePromise promise;
 
   public interface ResultCallback {
-    void deliver(Context cx, Scriptable scope, Object result);
+    void deliver(Context cx, VarScope scope, Object result);
   }
 
   public PromiseWrapper(NativePromise p) {
