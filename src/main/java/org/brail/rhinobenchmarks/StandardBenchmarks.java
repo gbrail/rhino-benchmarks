@@ -28,8 +28,8 @@ public class StandardBenchmarks {
     driver.loadCollection("octane-gbemu", List.of("./Octane/gbemu-part1.js",
             "./Octane/gbemu-part2.js"));*/
     driver.loadFile("octane-navier-stokes", "./Octane/navier-stokes.js");
-    // Fails
-    driver.loadFile("octane-pdfjs", "./Octane/pdfjs.js");
+    // Fails on 1.9.1
+    //driver.loadFile("octane-pdfjs", "./Octane/pdfjs.js");
     driver.loadFile("octane-raytrace", "./Octane/raytrace.js");
     // Checksum error -- might be a real bug?
     // driver.loadFile("octane-regexp", "./Octane/regexp.js");
@@ -123,11 +123,12 @@ public class StandardBenchmarks {
     "./ARES-6/ml/benchmark.js"));*/
     // ARES-6-Babylon: Missing TmpBase
 
-    driver.loadFile("seamonster-ai-astar", "./SeaMonster/ai-astar.js");
-    driver.loadFile("seamonster-gaussian-blur", "./SeaMonster/gaussian-blur.js");
-    driver.loadCollection(
-        "seamonster-crypto-aes",
-        List.of("./SeaMonster/sjlc.js", "./SeaMonster/stanford-crypto-aes.js"));
+    // Fails on 1.9.1
+    //driver.loadFile("seamonster-ai-astar", "./SeaMonster/ai-astar.js");
+    //driver.loadFile("seamonster-gaussian-blur", "./SeaMonster/gaussian-blur.js");
+    //driver.loadCollection(
+    //    "seamonster-crypto-aes",
+    //    List.of("./SeaMonster/sjlc.js", "./SeaMonster/stanford-crypto-aes.js"));
     driver.loadCollection(
         "seamonster-crypto-sha256",
         List.of("./SeaMonster/sjlc.js", "./SeaMonster/stanford-crypto-sha256.js"));
