@@ -1,0 +1,66 @@
+load("@contrib_rules_jvm//java:defs.bzl", "JUNIT5_DEPS", "java_junit5_test")
+load("@rules_java//java:defs.bzl", "java_library", "java_binary")
+
+java_library(
+    name = "rhino-benchmarks",
+    srcs = glob(["src/main/java/**/*.java"]),
+    resources = glob(["src/main/resources/**"]),
+    deps = [
+        "@maven//:com_fasterxml_jackson_core_jackson_databind",
+        "@maven//:info_picocli_picocli",
+        "@rhino//rhino",
+    ],
+)
+
+java_binary(
+    name = "benchmarks",
+    main_class = "org.brail.rhinobenchmarks.Main",
+    jvm_flags = [
+        "-XX:MaxGCPauseMillis=50",
+        "-XX:-TieredCompilation",
+        "-Xms4G",
+        "-Xmx4G",
+        "-Xbatch",
+    ],
+    runtime_deps = [
+        ":rhino-benchmarks",
+        "@maven//:com_fasterxml_jackson_core_jackson_databind",
+        "@maven//:info_picocli_picocli",
+        "@rhino//rhino",
+    ],
+)
+
+java_binary(
+    name = "compare",
+    main_class = "org.brail.rhinobenchmarks.Compare",
+    runtime_deps = [
+        ":rhino-benchmarks",
+        "@maven//:com_fasterxml_jackson_core_jackson_databind",
+        "@maven//:info_picocli_picocli",
+    ],
+)
+
+java_junit5_test(
+    name = "smoke-test",
+    size = "medium",
+    srcs = ["src/test/java/org/brail/rhinobenchmarks/test/StandardBenchmarkTest.java"],
+    data = glob([
+        "SunSpider/**",
+        "Octane/**",
+        "cdjs/**",
+        "RexBench/**",
+        "ARES-6/**",
+        "SeaMonster/**",
+        "WSL/**",
+        "simple/**",
+        "bigint/**",
+        "threejs/**",
+    ]),
+    test_class = "org.brail.rhinobenchmarks.test.StandardBenchmarkTest",
+    deps = [
+        ":rhino-benchmarks",
+        "@maven//:org_junit_jupiter_junit_jupiter_api",
+        "@maven//:org_junit_jupiter_junit_jupiter_params",
+        "@rhino//rhino",
+    ] + JUNIT5_DEPS,
+)
