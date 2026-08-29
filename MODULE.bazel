@@ -3,12 +3,11 @@ module(
     version = "0.0.1-SNAPSHOT",
 )
 
-bazel_dep(name = "rules_java", version = "9.6.1")
-bazel_dep(name = "rules_jvm_external", version = "7.0")
-bazel_dep(name = "contrib_rules_jvm", version = "0.33.0")
-bazel_dep(name = "rules_kotlin", version = "2.3.20")
+bazel_dep(name = "rules_java", version = "9.7.0")
+bazel_dep(name = "rules_jvm_external", version = "7.1")
+bazel_dep(name = "contrib_rules_jvm", version = "0.34.0")
+bazel_dep(name = "rules_kotlin", version = "2.4.0")
 bazel_dep(name = "rhino", version = "2.0.0-SNAPSHOT")
-
 local_path_override(
     module_name = "rhino",
     path = "../rhino",

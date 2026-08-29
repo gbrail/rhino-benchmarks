@@ -41,7 +41,7 @@ public class Performance extends ScriptableObject {
     return "Performance";
   }
 
-  private static Scriptable constructor(Context cx, VarScope scope, Object[] args) {
+  private static Scriptable constructor(Context cx, Object nt, VarScope scope, Object[] args) {
     return new Performance();
   }
 
@@ -56,12 +56,12 @@ public class Performance extends ScriptableObject {
     self.timeOrigin = doubleToTimestamp(d);
   }
 
-  private static Object now(Context cx, VarScope scope, Scriptable thisObj, Object[] args) {
+  private static Object now(Context cx, VarScope scope, Object thisObj, Object[] args) {
     var self = LambdaConstructor.convertThisObject(thisObj, Performance.class);
     return timestampToDouble(self.timeNow());
   }
 
-  private static Object mark(Context cx, VarScope scope, Scriptable thisObj, Object[] args) {
+  private static Object mark(Context cx, VarScope scope, Object thisObj, Object[] args) {
     var name = requiredStringArg(args, 0, "name");
     var self = LambdaConstructor.convertThisObject(thisObj, Performance.class);
     var entry = makeEntry(cx, scope, name, "mark", self.timeNow(), 0);
@@ -78,7 +78,7 @@ public class Performance extends ScriptableObject {
     return Undefined.instance;
   }
 
-  private static Object clearMarks(Context cx, VarScope scope, Scriptable thisObj, Object[] args) {
+  private static Object clearMarks(Context cx, VarScope scope, Object thisObj, Object[] args) {
     var name = stringArg(args, 0);
     var self = LambdaConstructor.convertThisObject(thisObj, Performance.class);
     if (name.isPresent()) {
@@ -89,7 +89,7 @@ public class Performance extends ScriptableObject {
     return Undefined.instance;
   }
 
-  private static Object measure(Context cx, VarScope scope, Scriptable thisObj, Object[] args) {
+  private static Object measure(Context cx, VarScope scope, Object thisObj, Object[] args) {
     var name = requiredStringArg(args, 0, "name");
     var startMark = stringArg(args, 1);
     var endMark = stringArg(args, 2);
@@ -111,7 +111,7 @@ public class Performance extends ScriptableObject {
   }
 
   private static Object clearMeasures(
-      Context cx, VarScope scope, Scriptable thisObj, Object[] args) {
+      Context cx, VarScope scope, Object thisObj, Object[] args) {
     var name = stringArg(args, 0);
     var self = LambdaConstructor.convertThisObject(thisObj, Performance.class);
     if (name.isPresent()) {
@@ -122,7 +122,7 @@ public class Performance extends ScriptableObject {
     return Undefined.instance;
   }
 
-  private static Object getEntries(Context cx, VarScope scope, Scriptable thisObj, Object[] args) {
+  private static Object getEntries(Context cx, VarScope scope, Object thisObj, Object[] args) {
     var entries = new ArrayList<>();
     var self = LambdaConstructor.convertThisObject(thisObj, Performance.class);
     entries.addAll(self.marks.values());
@@ -131,7 +131,7 @@ public class Performance extends ScriptableObject {
   }
 
   private static Object getEntriesByType(
-      Context cx, VarScope scope, Scriptable thisObj, Object[] args) {
+      Context cx, VarScope scope, Object thisObj, Object[] args) {
     var type = requiredStringArg(args, 0, "type");
     var self = LambdaConstructor.convertThisObject(thisObj, Performance.class);
     if ("mark".equals(type)) {
