@@ -1,0 +1,6 @@
+exports_files([
+    "package.json",
+    "package-lock.json",
+    "babel.config.json",
+    "babel_wrapper.js",
+])
