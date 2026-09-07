@@ -25,6 +25,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+
 var base_dir = '';
 load(base_dir + 'base.js');
 load(base_dir + 'richards.js');
@@ -44,23 +45,28 @@ load(base_dir + 'box2d.js');
 load(base_dir + 'typescript.js');
 load(base_dir + 'typescript-input.js');
 load(base_dir + 'typescript-compiler.js');
+
 var success = true;
+
 function PrintResult(name, result) {
   print(name + ': ' + result);
 }
+
+
 function PrintError(name, error) {
   PrintResult(name, error);
   success = false;
 }
+
+
 function PrintScore(score) {
   if (success) {
     print('----');
     print('Score (version ' + BenchmarkSuite.version + '): ' + score);
   }
 }
-BenchmarkSuite.RunSuites({
-  NotifyResult: PrintResult,
-  NotifyError: PrintError,
-  NotifyScore: PrintScore
-});
 
+
+BenchmarkSuite.RunSuites({ NotifyResult: PrintResult,
+                           NotifyError: PrintError,
+                           NotifyScore: PrintScore });

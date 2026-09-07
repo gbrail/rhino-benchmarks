@@ -24,8 +24,11 @@ run-other.sh:
 
 ## Updating Benchmarks
 
-The Makefile in the "babel" directory copies benchmarks from a clone of the WebKit repository and copies them to the main source directory. To add new
-benchmarks from JetStream, update the Makefile, and load them in Main.java.
+Benchmarks are kept in their original form in the top-level directories
+(SunSpider, Octane, etc.). Bazel runs Babel over them automatically at build
+time (see the rules in the "bazel" directory). To add new benchmarks from
+JetStream, copy their sources into the appropriate directory and load them in
+StandardBenchmarks.java.
 
 ## Benchmark Selection
 

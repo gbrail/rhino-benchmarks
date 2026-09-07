@@ -1,8 +1,3 @@
-function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
-function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
-function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 // Copyright 2013 the Octane Benchmark project authors. All rights reserved.
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -30,6 +25,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+
 // The code in BASE_JS below:
 // Copyright 2012 The Closure Library Authors. All Rights Reserved.
 //
@@ -44,6 +40,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 
 // The code in JQUERY_JS below:
 // Copyright (c) 2012 John Resig, http://jquery.com/
@@ -71,14 +68,17 @@ function setupCodeLoad() {
   salt = 0;
   indirectEval = eval;
 }
+
 function tearDownCodeLoad() {
   salt = null;
   indirectEval = null;
 }
+
 function runCodeLoadClosure() {
   runClosure();
   salt++;
 }
+
 function runCodeLoadJQuery() {
   runJQuery();
   salt++;
@@ -233,7 +233,8 @@ tor=a};goog.base=function(a,b,c){var d=arguments.callee.caller;if(d.superClass_\
 ;f=f.superClass_&&f.superClass_.constructor)if(f.prototype[b]===d)g=true;else i\
 f(g)return f.prototype[b].apply(a,e);if(a[b]===d)return a.constructor.prototype\
 [b].apply(a,e);throw Error(\"goog.base called from a method of one name to a me\
-thod of a different name\");};goog.scope=function(a){a.call(goog.global)};";
+thod of a different name\");};goog.scope=function(a){a.call(goog.global)};"
+
 var JQUERY_JS = "/*! jQuery v1.7.2 jquery.com | jquery.org/license */ (function\
 (a,b){function cy(a){return f.isWindow(a)?a:a.nodeType===9?a.defaultView||a.par\
 entWindow:!1}function cu(a){if(!cj[a]){var b=c.body,d=f(\"<\"+a+\">\").appendTo\
@@ -1465,77 +1466,72 @@ ntElement[d];return f.support.boxModel&&j||i.body&&i.body[d]||j}if(a.nodeType==\
 ],a.body[g],i[g])}if(h===b){k=f.css(a,c),l=parseFloat(k);return f.isNumeric(l)?\
 l:k}f(a).css(c,h)},c,a,arguments.length,null)}}),a.jQuery=a.$=f,typeof define==\
 \"function\"&&define.amd&&define.amd.jQuery&&define(\"jquery\",[],function(){re\
-turn f})})(windowmock);";
+turn f})})(windowmock);"
 
 // Jenkins hash function.
 function jenkinsHash(key, len) {
   var hash = 0;
-  for (var i = 0; i < len; ++i) {
+  for(var i = 0; i < len; ++i) {
     hash += key[i];
-    hash += hash << 10;
-    hash ^= hash >> 6;
+    hash += (hash << 10);
+    hash ^= (hash >> 6);
   }
-  hash += hash << 3;
-  hash ^= hash >> 11;
-  hash += hash << 15;
+  hash += (hash << 3);
+  hash ^= (hash >> 11);
+  hash += (hash << 15);
   return hash;
 }
+
 function cacheBust(str, old) {
   var keys = salt.toString().split('').map(parseFloat);
   var hash = Math.abs(jenkinsHash(keys, keys.length));
   var replacement = old + hash.toString(36);
   return str.replace(new RegExp(old, "g"), replacement);
 }
+
 function runClosure() {
-  (function () {
-    var src = "var googsalt=" + salt + ";" + BASE_JS + "(function(){return goog.cloneObject(googsalt);})();";
+  (function() {
+    var src = "var googsalt=" + salt + ";" + BASE_JS +
+              "(function(){return goog.cloneObject(googsalt);})();";
     src = cacheBust(src, "goog");
     var result = indirectEval(src);
-    if (result != salt) throw new Error("Incorrect result: " + result);
+    if (result != salt) throw(new Error("Incorrect result: " + result));
   })();
 }
+
 function MockElement() {
-  this.appendChild = function (a) {};
-  this.createComment = function (a) {};
-  this.createDocumentFragment = function () {
-    return new MockElement();
-  };
-  this.createElement = function (a) {
-    return new MockElement();
-  };
+  this.appendChild = function(a) {};
+  this.createComment = function(a) {};
+  this.createDocumentFragment = function() { return new MockElement(); };
+  this.createElement = function(a) { return new MockElement(); };
   this.documentElement = this;
-  this.getElementById = function (a) {
-    return 0;
-  };
-  this.getElementsByTagName = function (a) {
-    return [0];
-  };
-  this.insertBefore = function (a, b) {};
-  this.removeChild = function (a) {};
-  this.setAttribute = function (a, b) {};
+  this.getElementById = function(a) { return 0; };
+  this.getElementsByTagName = function(a) {return [0];};
+  this.insertBefore = function(a, b) {};
+  this.removeChild = function(a) {};
+  this.setAttribute = function(a, b) {};
 }
+
 function runJQuery() {
-  (function () {
+  (function() {
     var src = "var windowmock = {'document':new MockElement(),\
                                  'location':{'href':''},\
-                                 'navigator':{'userAgent':''}};" + "var jQuerySalt=" + salt + ";" + JQUERY_JS + "(function(){return windowmock.jQuery.grep([jQuerySalt],\
+                                 'navigator':{'userAgent':''}};" +
+              "var jQuerySalt=" + salt + ";" + JQUERY_JS +
+              "(function(){return windowmock.jQuery.grep([jQuerySalt],\
               function(a,b){return true;})[0];})();";
     src = cacheBust(src, "jQuery");
     var result = indirectEval(src);
-    if (result != salt) throw new Error("Incorrect result: " + result);
+    if (result != salt) throw(new Error("Incorrect result: " + result));
   })();
 }
-var Benchmark = /*#__PURE__*/function () {
-  function Benchmark() {
-    _classCallCheck(this, Benchmark);
-  }
-  return _createClass(Benchmark, [{
-    key: "runIteration",
-    value: function runIteration() {
-      runCodeLoadClosure();
-      runCodeLoadJQuery();
-    }
-  }]);
-}();
-setupCodeLoad();
 
+
+class Benchmark {
+    runIteration() {
+        runCodeLoadClosure();
+        runCodeLoadJQuery();
+    }
+}
+
+setupCodeLoad();

@@ -1,8 +1,3 @@
-function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
-function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
-function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 // Copyright 2006-2008 the V8 project authors. All rights reserved.
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -30,6 +25,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+
 // This is a JavaScript implementation of the Richards
 // benchmark from:
 //
@@ -38,6 +34,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
 // The benchmark was originally implemented in BCPL by
 // Martin Richards.
 
+
 /**
  * The Richards benchmark simulates the task dispatcher of an
  * operating system.
@@ -45,25 +42,36 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
 function runRichards() {
   var scheduler = new Scheduler();
   scheduler.addIdleTask(ID_IDLE, 0, null, COUNT);
+
   var queue = new Packet(null, ID_WORKER, KIND_WORK);
-  queue = new Packet(queue, ID_WORKER, KIND_WORK);
+  queue = new Packet(queue,  ID_WORKER, KIND_WORK);
   scheduler.addWorkerTask(ID_WORKER, 1000, queue);
+
   queue = new Packet(null, ID_DEVICE_A, KIND_DEVICE);
-  queue = new Packet(queue, ID_DEVICE_A, KIND_DEVICE);
-  queue = new Packet(queue, ID_DEVICE_A, KIND_DEVICE);
+  queue = new Packet(queue,  ID_DEVICE_A, KIND_DEVICE);
+  queue = new Packet(queue,  ID_DEVICE_A, KIND_DEVICE);
   scheduler.addHandlerTask(ID_HANDLER_A, 2000, queue);
+
   queue = new Packet(null, ID_DEVICE_B, KIND_DEVICE);
-  queue = new Packet(queue, ID_DEVICE_B, KIND_DEVICE);
-  queue = new Packet(queue, ID_DEVICE_B, KIND_DEVICE);
+  queue = new Packet(queue,  ID_DEVICE_B, KIND_DEVICE);
+  queue = new Packet(queue,  ID_DEVICE_B, KIND_DEVICE);
   scheduler.addHandlerTask(ID_HANDLER_B, 3000, queue);
+
   scheduler.addDeviceTask(ID_DEVICE_A, 4000, null);
+
   scheduler.addDeviceTask(ID_DEVICE_B, 5000, null);
+
   scheduler.schedule();
-  if (scheduler.queueCount != EXPECTED_QUEUE_COUNT || scheduler.holdCount != EXPECTED_HOLD_COUNT) {
-    var msg = "Error during execution: queueCount = " + scheduler.queueCount + ", holdCount = " + scheduler.holdCount + ".";
+
+  if (scheduler.queueCount != EXPECTED_QUEUE_COUNT ||
+      scheduler.holdCount != EXPECTED_HOLD_COUNT) {
+    var msg =
+        "Error during execution: queueCount = " + scheduler.queueCount +
+        ", holdCount = " + scheduler.holdCount + ".";
     throw new Error(msg);
   }
 }
+
 var COUNT = 1000;
 
 /**
@@ -75,6 +83,7 @@ var COUNT = 1000;
  **/
 var EXPECTED_QUEUE_COUNT = 2322;
 var EXPECTED_HOLD_COUNT = 928;
+
 
 /**
  * A scheduler can be used to schedule a set of tasks based on their relative
@@ -90,15 +99,17 @@ function Scheduler() {
   this.currentTcb = null;
   this.currentId = null;
 }
-var ID_IDLE = 0;
-var ID_WORKER = 1;
-var ID_HANDLER_A = 2;
-var ID_HANDLER_B = 3;
-var ID_DEVICE_A = 4;
-var ID_DEVICE_B = 5;
+
+var ID_IDLE       = 0;
+var ID_WORKER     = 1;
+var ID_HANDLER_A  = 2;
+var ID_HANDLER_B  = 3;
+var ID_DEVICE_A   = 4;
+var ID_DEVICE_B   = 5;
 var NUMBER_OF_IDS = 6;
-var KIND_DEVICE = 0;
-var KIND_WORK = 1;
+
+var KIND_DEVICE   = 0;
+var KIND_WORK     = 1;
 
 /**
  * Add an idle task to this scheduler.
@@ -138,7 +149,7 @@ Scheduler.prototype.addHandlerTask = function (id, priority, queue) {
  * @param {Packet} queue the queue of work to be processed by the task
  */
 Scheduler.prototype.addDeviceTask = function (id, priority, queue) {
-  this.addTask(id, priority, queue, new DeviceTask(this));
+  this.addTask(id, priority, queue, new DeviceTask(this))
 };
 
 /**
@@ -274,23 +285,30 @@ var STATE_SUSPENDED = 2;
  * The task is blocked and cannot be run until it is explicitly released.
  */
 var STATE_HELD = 4;
+
 var STATE_SUSPENDED_RUNNABLE = STATE_SUSPENDED | STATE_RUNNABLE;
 var STATE_NOT_HELD = ~STATE_HELD;
+
 TaskControlBlock.prototype.setRunning = function () {
   this.state = STATE_RUNNING;
 };
+
 TaskControlBlock.prototype.markAsNotHeld = function () {
   this.state = this.state & STATE_NOT_HELD;
 };
+
 TaskControlBlock.prototype.markAsHeld = function () {
   this.state = this.state | STATE_HELD;
 };
+
 TaskControlBlock.prototype.isHeldOrSuspended = function () {
-  return (this.state & STATE_HELD) != 0 || this.state == STATE_SUSPENDED;
+  return (this.state & STATE_HELD) != 0 || (this.state == STATE_SUSPENDED);
 };
+
 TaskControlBlock.prototype.markAsSuspended = function () {
   this.state = this.state | STATE_SUSPENDED;
 };
+
 TaskControlBlock.prototype.markAsRunnable = function () {
   this.state = this.state | STATE_RUNNABLE;
 };
@@ -329,6 +347,7 @@ TaskControlBlock.prototype.checkPriorityAdd = function (task, packet) {
   }
   return task;
 };
+
 TaskControlBlock.prototype.toString = function () {
   return "tcb { " + this.task + "@" + this.state + " }";
 };
@@ -346,6 +365,7 @@ function IdleTask(scheduler, v1, count) {
   this.v1 = v1;
   this.count = count;
 }
+
 IdleTask.prototype.run = function (packet) {
   this.count--;
   if (this.count == 0) return this.scheduler.holdCurrent();
@@ -353,12 +373,13 @@ IdleTask.prototype.run = function (packet) {
     this.v1 = this.v1 >> 1;
     return this.scheduler.release(ID_DEVICE_A);
   } else {
-    this.v1 = this.v1 >> 1 ^ 0xD008;
+    this.v1 = (this.v1 >> 1) ^ 0xD008;
     return this.scheduler.release(ID_DEVICE_B);
   }
 };
+
 IdleTask.prototype.toString = function () {
-  return "IdleTask";
+  return "IdleTask"
 };
 
 /**
@@ -371,6 +392,7 @@ function DeviceTask(scheduler) {
   this.scheduler = scheduler;
   this.v1 = null;
 }
+
 DeviceTask.prototype.run = function (packet) {
   if (packet == null) {
     if (this.v1 == null) return this.scheduler.suspendCurrent();
@@ -382,6 +404,7 @@ DeviceTask.prototype.run = function (packet) {
     return this.scheduler.holdCurrent();
   }
 };
+
 DeviceTask.prototype.toString = function () {
   return "DeviceTask";
 };
@@ -398,6 +421,7 @@ function WorkerTask(scheduler, v1, v2) {
   this.v1 = v1;
   this.v2 = v2;
 }
+
 WorkerTask.prototype.run = function (packet) {
   if (packet == null) {
     return this.scheduler.suspendCurrent();
@@ -417,6 +441,7 @@ WorkerTask.prototype.run = function (packet) {
     return this.scheduler.queue(packet);
   }
 };
+
 WorkerTask.prototype.toString = function () {
   return "WorkerTask";
 };
@@ -431,6 +456,7 @@ function HandlerTask(scheduler) {
   this.v1 = null;
   this.v2 = null;
 }
+
 HandlerTask.prototype.run = function (packet) {
   if (packet != null) {
     if (packet.kind == KIND_WORK) {
@@ -458,6 +484,7 @@ HandlerTask.prototype.run = function (packet) {
   }
   return this.scheduler.suspendCurrent();
 };
+
 HandlerTask.prototype.toString = function () {
   return "HandlerTask";
 };
@@ -495,24 +522,21 @@ function Packet(link, id, kind) {
 Packet.prototype.addTo = function (queue) {
   this.link = null;
   if (queue == null) return this;
-  var peek,
-    next = queue;
-  while ((peek = next.link) != null) next = peek;
+  var peek, next = queue;
+  while ((peek = next.link) != null)
+    next = peek;
   next.link = this;
   return queue;
 };
+
 Packet.prototype.toString = function () {
   return "Packet";
 };
-var Benchmark = /*#__PURE__*/function () {
-  function Benchmark() {
-    _classCallCheck(this, Benchmark);
-  }
-  return _createClass(Benchmark, [{
-    key: "runIteration",
-    value: function runIteration() {
-      for (var i = 0; i < 50; ++i) runRichards();
-    }
-  }]);
-}();
 
+
+class Benchmark {
+    runIteration() {
+        for (let i = 0; i < 50; ++i)
+            runRichards();
+    }
+}

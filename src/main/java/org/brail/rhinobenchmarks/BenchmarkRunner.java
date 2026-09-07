@@ -1,6 +1,5 @@
 package org.brail.rhinobenchmarks;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -29,7 +28,7 @@ import org.mozilla.javascript.VarScope;
 public class BenchmarkRunner {
   private static final ContextFactory CONTEXT_FACTORY = new BenchmarkContextFactory();
 
-  private final List<Path> files;
+  private final List<String> files;
 
   @SuppressWarnings("unused")
   public static volatile Object blackhole;
@@ -42,38 +41,43 @@ public class BenchmarkRunner {
 
   private record RunArgs(VarScope scope, Scriptable thisObj, Callable run) {}
 
-  private BenchmarkRunner(List<Path> files) {
+  private BenchmarkRunner(List<String> files) {
     this.files = files;
   }
 
   public static BenchmarkRunner load(Path path) throws BenchmarkException, IOException {
-    if (!path.toFile().exists()) {
-      throw new IOException("Not found: " + path);
-    }
-    return new BenchmarkRunner(List.of(path));
+    return load(List.of(path.toString()));
   }
 
   public static BenchmarkRunner load(List<String> fileNames)
       throws BenchmarkException, IOException {
-    var paths = fileNames.stream().map(Path::of).toList();
-    for (var p : paths) {
-      if (!p.toFile().exists()) {
-        throw new IOException("Not found: " + p);
+    var names = fileNames.stream().map(BenchmarkRunner::resourceName).toList();
+    for (var n : names) {
+      if (BenchmarkRunner.class.getClassLoader().getResource(n) == null) {
+        throw new IOException("Not found: " + n);
       }
     }
-    return new BenchmarkRunner(paths);
+    return new BenchmarkRunner(names);
   }
 
-  private static void loadFile(Context cx, VarScope scope, Path path) throws IOException {
-    try (var in = new FileInputStream(path.toFile())) {
+  /** Convert a file name like "./SunSpider/3d-cube.js" into a classpath resource name. */
+  private static String resourceName(String fileName) {
+    return Path.of(fileName).normalize().toString();
+  }
+
+  private static void loadFile(Context cx, VarScope scope, String name) throws IOException {
+    try (var in = BenchmarkRunner.class.getClassLoader().getResourceAsStream(name)) {
+      if (in == null) {
+        throw new IOException("Not found: " + name);
+      }
       Reader rdr;
-      if (path.toString().endsWith(".z")) {
+      if (name.endsWith(".z")) {
         Inflater inflater = new Inflater();
         rdr = new InputStreamReader(new InflaterInputStream(in, inflater), StandardCharsets.UTF_8);
       } else {
         rdr = new InputStreamReader(in, StandardCharsets.UTF_8);
       }
-      cx.evaluateReader(scope, rdr, path.getFileName().toString(), 1, null);
+      cx.evaluateReader(scope, rdr, Path.of(name).getFileName().toString(), 1, null);
     }
   }
 

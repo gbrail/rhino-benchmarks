@@ -1,10 +1,40 @@
 load("@contrib_rules_jvm//java:defs.bzl", "JUNIT5_DEPS", "java_junit5_test")
 load("@rules_java//java:defs.bzl", "java_library", "java_binary")
+load("//bazel:babel_rules.bzl", "babel_preprocess")
+
+# Transform the original benchmark sources with Babel so Rhino can run them.
+babel_preprocess(
+    name = "preprocessed_benchmarks",
+    srcs = glob([
+        "SunSpider/**/*.js",
+        "Octane/**/*.js",
+        "cdjs/**/*.js",
+        "RexBench/**/*.js",
+        "ARES-6/**/*.js",
+        "SeaMonster/**/*.js",
+        "WSL/**/*.js",
+        "simple/**/*.js",
+        "bigint/**/*.js",
+        "threejs/**/*.js",
+    ]),
+)
+
+# These payloads are compressed and must not be run through Babel.
+filegroup(
+    name = "compressed_benchmarks",
+    srcs = [
+        "RexBench/FlightPlanner/waypoints.js.z",
+        "SeaMonster/inspector-json-payload.js.z",
+    ],
+)
 
 java_library(
     name = "rhino-benchmarks",
     srcs = glob(["src/main/java/**/*.java"]),
-    resources = glob(["src/main/resources/**"]),
+    resources = glob(["src/main/resources/**"]) + [
+        ":compressed_benchmarks",
+        ":preprocessed_benchmarks",
+    ],
     deps = [
         "@maven//:com_fasterxml_jackson_core_jackson_databind",
         "@maven//:info_picocli_picocli",
@@ -44,18 +74,8 @@ java_junit5_test(
     name = "smoke-test",
     size = "medium",
     srcs = ["src/test/java/org/brail/rhinobenchmarks/test/StandardBenchmarkTest.java"],
-    data = glob([
-        "SunSpider/**",
-        "Octane/**",
-        "cdjs/**",
-        "RexBench/**",
-        "ARES-6/**",
-        "SeaMonster/**",
-        "WSL/**",
-        "simple/**",
-        "bigint/**",
-        "threejs/**",
-    ]),
+    # The benchmark scripts come in through the ":rhino-benchmarks" library's
+    # resources (preprocessed by Babel) rather than as data dependencies.
     test_class = "org.brail.rhinobenchmarks.test.StandardBenchmarkTest",
     deps = [
         ":rhino-benchmarks",
