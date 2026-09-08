@@ -32,3 +32,7 @@ and re-run if variance is too high to try and get a consistent result, although 
 The original source for each benchmark is in the "wpt" submodule.
 Bazel rules preprocess the source using Babel to remove Rhino
 inconsistencies and missing features.
+
+If the "local_path_override" in MODULE.bazel is uncommented, this
+project uses the copy of Rhino in a sibling directory. This makes it
+easy to patch Rhino and then quickly test the effects.

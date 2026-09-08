@@ -50,7 +50,6 @@ java_binary(
         "-XX:-TieredCompilation",
         "-Xms4G",
         "-Xmx4G",
-        "-Xbatch",
     ],
     runtime_deps = [
         ":rhino-benchmarks",
