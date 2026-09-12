@@ -6,6 +6,12 @@ def _babel_preprocess_impl(ctx):
         src_path = src.path
         rel_path = src_path
 
+        # Optionally strip a leading prefix (e.g. "JetStream") so outputs keep
+        # their original top-level layout on the classpath.
+        strip = ctx.attr.strip_prefix
+        if strip and rel_path.startswith(strip + "/"):
+            rel_path = rel_path[len(strip) + 1:]
+
         if ctx.attr.prefix:
             out_rel = ctx.attr.prefix + "/" + rel_path
         else:
@@ -50,6 +56,9 @@ babel_preprocess = rule(
     attrs = {
         "srcs": attr.label_list(allow_files = True),
         "prefix": attr.string(doc = "Prefix for output; if empty, outputs keep their source paths"),
+        "strip_prefix": attr.string(
+            doc = "Leading path prefix (e.g. \"JetStream\") to strip from source paths when naming outputs",
+        ),
         "_wrapper_js": attr.label(
             allow_single_file = True,
             default = "//bazel:babel_wrapper.js",

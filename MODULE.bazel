@@ -8,16 +8,16 @@ bazel_dep(name = "rules_jvm_external", version = "7.1")
 bazel_dep(name = "contrib_rules_jvm", version = "0.34.0")
 bazel_dep(name = "rules_kotlin", version = "2.4.0")
 bazel_dep(name = "rhino", version = "2.0.0-SNAPSHOT")
-#local_path_override(
-#    module_name = "rhino",
-#    path = "../rhino",
-#)
-
-git_override(
+local_path_override(
     module_name = "rhino",
-    remote = "https://github.com/mozilla/rhino.git",
-    commit = "54c290216c40cfda0507d1902b220b00f5540d9e"
+    path = "../rhino2",
 )
+
+#git_override(
+#    module_name = "rhino",
+#    remote = "https://github.com/mozilla/rhino.git",
+#    commit = "54c290216c40cfda0507d1902b220b00f5540d9e"
+#)
 
 maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
 

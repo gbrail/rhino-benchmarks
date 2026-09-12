@@ -1,3 +1,3 @@
-[submodule "wpt"]
-	path = wpt
-	url = https://github.com/web-platform-tests/wpt.git
+[submodule "JetStream"]
+	path = JetStream
+	url = https://github.com/WebKit/JetStream

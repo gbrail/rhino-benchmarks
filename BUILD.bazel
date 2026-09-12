@@ -3,29 +3,38 @@ load("@rules_java//java:defs.bzl", "java_library", "java_binary")
 load("//bazel:babel_rules.bzl", "babel_preprocess")
 
 # Transform the original benchmark sources with Babel so Rhino can run them.
+# The sources live in the JetStream submodule; strip_prefix restores the
+# top-level layout the Java driver expects on the classpath.
 babel_preprocess(
     name = "preprocessed_benchmarks",
     srcs = glob([
-        "SunSpider/**/*.js",
-        "Octane/**/*.js",
-        "cdjs/**/*.js",
-        "RexBench/**/*.js",
-        "ARES-6/**/*.js",
-        "SeaMonster/**/*.js",
-        "WSL/**/*.js",
-        "simple/**/*.js",
-        "bigint/**/*.js",
-        "threejs/**/*.js",
+        "JetStream/SunSpider/**/*.js",
+        "JetStream/Octane/**/*.js",
+        "JetStream/cdjs/**/*.js",
+        "JetStream/RexBench/**/*.js",
+        "JetStream/ARES-6/**/*.js",
+        "JetStream/SeaMonster/**/*.js",
+        "JetStream/WSL/**/*.js",
+        "JetStream/simple/**/*.js",
+        "JetStream/bigint/**/*.js",
+        "JetStream/threejs/**/*.js",
     ]),
+    strip_prefix = "JetStream",
 )
 
-# These payloads are compressed and must not be run through Babel.
-filegroup(
+# These payloads are compressed and must not be run through Babel. They are
+# copied (not transformed) to their top-level classpath locations.
+genrule(
     name = "compressed_benchmarks",
     srcs = [
+        "JetStream/RexBench/FlightPlanner/waypoints.js.z",
+        "JetStream/SeaMonster/inspector-json-payload.js.z",
+    ],
+    outs = [
         "RexBench/FlightPlanner/waypoints.js.z",
         "SeaMonster/inspector-json-payload.js.z",
     ],
+    cmd = "cp $(location JetStream/RexBench/FlightPlanner/waypoints.js.z) $(location RexBench/FlightPlanner/waypoints.js.z) && cp $(location JetStream/SeaMonster/inspector-json-payload.js.z) $(location SeaMonster/inspector-json-payload.js.z)",
 )
 
 java_library(
