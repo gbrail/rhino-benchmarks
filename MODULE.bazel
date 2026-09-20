@@ -14,10 +14,15 @@ bazel_dep(name = "rules_rhino", version = "0.0.1")
 #    path = "../rhino",
 #)
 
+#local_path_override(
+#    module_name = "rules_rhino",
+#    path = "../rules_rhino",
+#)
+
 git_override(
     module_name = "rules_rhino",
     remote = "https://github.com/gbrail/rules_rhino.git",
-    commit = "c4f13e57a74d69e8a10152faf97a232b6bcd3581",
+    commit = "668b18d405f841ff87e6189019b9df7fd5938f60",
 )
 
 git_override(
