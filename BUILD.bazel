@@ -1,6 +1,6 @@
-load("@contrib_rules_jvm//java:defs.bzl", "JUNIT5_DEPS", "java_junit5_test")
 load("@rules_java//java:defs.bzl", "java_library", "java_binary")
-load("//bazel:babel_rules.bzl", "babel_preprocess")
+load("@rules_rhino//java:defs.bzl", "junit5_test")
+load("@rules_rhino//babel:defs.bzl", "babel_preprocess")
 
 # Transform the original benchmark sources with Babel so Rhino can run them.
 # The sources live in the JetStream submodule; strip_prefix restores the
@@ -20,6 +20,7 @@ babel_preprocess(
         "JetStream/threejs/**/*.js",
     ]),
     strip_prefix = "JetStream",
+    config = "//bazel:babel.config.json",
 )
 
 # These payloads are compressed and must not be run through Babel. They are
@@ -78,7 +79,7 @@ java_binary(
     ],
 )
 
-java_junit5_test(
+junit5_test(
     name = "smoke-test",
     size = "medium",
     srcs = ["src/test/java/org/brail/rhinobenchmarks/test/StandardBenchmarkTest.java"],
@@ -90,5 +91,5 @@ java_junit5_test(
         "@maven//:org_junit_jupiter_junit_jupiter_api",
         "@maven//:org_junit_jupiter_junit_jupiter_params",
         "@rhino//rhino",
-    ] + JUNIT5_DEPS,
+    ],
 )

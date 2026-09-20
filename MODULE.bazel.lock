@@ -200,6 +200,7 @@
     "https://bcr.bazel.build/modules/rules_java/8.9.0/MODULE.bazel": "e17c876cb53dcd817b7b7f0d2985b710610169729e8c371b2221cacdcd3dce4a",
     "https://bcr.bazel.build/modules/rules_java/9.1.0/MODULE.bazel": "ee63f27e36a3fada80342869361182f120a9819c74320e8e65b1e04ba0cd7a9d",
     "https://bcr.bazel.build/modules/rules_java/9.3.0/MODULE.bazel": "f657c72d65ac449caae9abf2e68e66c0d36f9416848c4c4903d0b3234229e7f2",
+    "https://bcr.bazel.build/modules/rules_java/9.6.1/MODULE.bazel": "6b0b7172ce598e37e31d1e24f2a492a5249b88304bd25b02b465ee22e3aa3752",
     "https://bcr.bazel.build/modules/rules_java/9.7.0/MODULE.bazel": "3ce6bd55fdd4fcb3323197736b7d976e0eedcc0eea78ca6186d20d314ba12e12",
     "https://bcr.bazel.build/modules/rules_java/9.7.0/source.json": "23b356565156e0fbc71e5dad7cf8e1b951466b7ae3fd731cb1d2c95ca82b1d70",
     "https://bcr.bazel.build/modules/rules_jvm_external/4.4.2/MODULE.bazel": "a56b85e418c83eb1839819f0b515c431010160383306d13ec21959ac412d2fe7",
@@ -211,6 +212,7 @@
     "https://bcr.bazel.build/modules/rules_jvm_external/6.6/MODULE.bazel": "153042249c7060536dc95b6bb9f9bb8063b8a0b0cb7acdb381bddbc2374aed55",
     "https://bcr.bazel.build/modules/rules_jvm_external/6.7/MODULE.bazel": "e717beabc4d091ecb2c803c2d341b88590e9116b8bf7947915eeb33aab4f96dd",
     "https://bcr.bazel.build/modules/rules_jvm_external/6.9/MODULE.bazel": "07c5db05527db7744a54fcffd653e1550d40e0540207a7f7e6d0a4de5bef8274",
+    "https://bcr.bazel.build/modules/rules_jvm_external/7.0/MODULE.bazel": "421482bdbcf05709f933c96b867a599deb517f2804ceb3e74511880610cfbf71",
     "https://bcr.bazel.build/modules/rules_jvm_external/7.1/MODULE.bazel": "e151b1beaa45bfc9e5de4df637d980e27039eb2b1092a95972bf2adbf99ac1a0",
     "https://bcr.bazel.build/modules/rules_jvm_external/7.1/source.json": "8cb571a9631c39bf29c1842958542f14bba1c704fe2bcde4fa54679b2a6b3d6f",
     "https://bcr.bazel.build/modules/rules_kotlin/1.9.5/MODULE.bazel": "043a16a572f610558ec2030db3ff0c9938574e7dd9f58bded1bb07c0192ef025",
@@ -284,22 +286,6 @@
   },
   "selectedYankedVersions": {},
   "moduleExtensions": {
-    "//bazel:babel_repo.bzl%babel_deps_extension": {
-      "general": {
-        "bzlTransitiveDigest": "8GQPq7nulnmI0vSaGs1kDL/dxqfs6jD0p5TbkjzNEqA=",
-        "usagesDigest": "CG3SpikabRYSRxxbJnSLhlpMyyetK1e4RpY0yLef2Rg=",
-        "recordedInputs": [],
-        "generatedRepoSpecs": {
-          "babel_deps": {
-            "repoRuleId": "@@//bazel:babel_repo.bzl%babel_deps_repo",
-            "attributes": {
-              "package_json": "@@//bazel:package.json",
-              "package_lock": "@@//bazel:package-lock.json"
-            }
-          }
-        }
-      }
-    },
     "@@apple_rules_lint+//lint:extensions.bzl%linter": {
       "general": {
         "bzlTransitiveDigest": "g7izj5kLCmsajh8IospHh4ZQ35dyM0FIrA8D4HapAsM=",
@@ -557,6 +543,22 @@
                 ]
               },
               "toolchain_target_settings": {}
+            }
+          }
+        }
+      }
+    },
+    "@@rules_rhino+//babel/private:babel_repo.bzl%babel_deps_extension": {
+      "general": {
+        "bzlTransitiveDigest": "ZXqiNUT8aMkPJjcFR7s997AnX0IwPaXoY7QAnjvuVR8=",
+        "usagesDigest": "lIe/OyAi0P4kT+eSUvCB/mNDwZ4p72yl+kUngCtbwJs=",
+        "recordedInputs": [],
+        "generatedRepoSpecs": {
+          "rhino_babel_deps": {
+            "repoRuleId": "@@rules_rhino+//babel/private:babel_repo.bzl%babel_deps_repo",
+            "attributes": {
+              "package_json": "@@rules_rhino+//babel:package.json",
+              "package_lock": "@@rules_rhino+//babel:package-lock.json"
             }
           }
         }

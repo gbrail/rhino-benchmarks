@@ -5,18 +5,24 @@ module(
 
 bazel_dep(name = "rules_java", version = "9.7.0")
 bazel_dep(name = "rules_jvm_external", version = "7.1")
-bazel_dep(name = "contrib_rules_jvm", version = "0.34.0")
 bazel_dep(name = "rules_kotlin", version = "2.4.0")
 bazel_dep(name = "rhino", version = "2.0.0-SNAPSHOT")
+bazel_dep(name = "rules_rhino", version = "0.0.1")
+
 #local_path_override(
 #    module_name = "rhino",
-#    path = "../rhino2",
+#    path = "../rhino",
 #)
 
 git_override(
+    module_name = "rules_rhino",
+    remote = "https://github.com/gbrail/rules_rhino.git",
+    commit = "975c4c604b6cb13a357f9b3497aefee94b955b4e",
+)
+git_override(
     module_name = "rhino",
     remote = "https://github.com/mozilla/rhino.git",
-    commit = "54c290216c40cfda0507d1902b220b00f5540d9e",
+    commit = "209d9cef2e262edcf1d8be5c3651245a4fc7b9b3",
 )
 
 maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
@@ -45,6 +51,3 @@ maven.install(
     ],
 )
 use_repo(maven, "maven")
-
-babel_deps = use_extension("//bazel:babel_repo.bzl", "babel_deps_extension")
-use_repo(babel_deps, "babel_deps")
