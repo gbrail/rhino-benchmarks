@@ -547,22 +547,6 @@
           }
         }
       }
-    },
-    "@@rules_rhino+//babel/private:babel_repo.bzl%babel_deps_extension": {
-      "general": {
-        "bzlTransitiveDigest": "ZXqiNUT8aMkPJjcFR7s997AnX0IwPaXoY7QAnjvuVR8=",
-        "usagesDigest": "lIe/OyAi0P4kT+eSUvCB/mNDwZ4p72yl+kUngCtbwJs=",
-        "recordedInputs": [],
-        "generatedRepoSpecs": {
-          "rhino_babel_deps": {
-            "repoRuleId": "@@rules_rhino+//babel/private:babel_repo.bzl%babel_deps_repo",
-            "attributes": {
-              "package_json": "@@rules_rhino+//babel:package.json",
-              "package_lock": "@@rules_rhino+//babel:package-lock.json"
-            }
-          }
-        }
-      }
     }
   },
   "facts": {
