@@ -62,7 +62,7 @@ public class BenchmarkRunner {
 
   /** Convert a file name like "./SunSpider/3d-cube.js" into a classpath resource name. */
   private static String resourceName(String fileName) {
-    return Path.of(fileName).normalize().toString();
+    return Path.of(fileName).normalize().toString().replace('\\', '/');
   }
 
   private static void loadFile(Context cx, VarScope scope, String name) throws IOException {

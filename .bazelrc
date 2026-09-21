@@ -1,9 +1,6 @@
 build --java_language_version=25
 build --java_runtime_version=remotejdk_25
 
-# Forward PATH so that host commands (like node) can be found in actions
-build --action_env=PATH
-
 build --javacopt="-encoding UTF-8"
 
 # Set up Errorprone for success
@@ -33,3 +30,4 @@ build --javacopt="-Xep:UnusedVariable:OFF"
 build --javacopt="-Xep:AnnotateFormatMethod:OFF"
 
 try-import %workspace%/.bazelrc.user
+

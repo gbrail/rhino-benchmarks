@@ -1,6 +1,7 @@
 load("@rules_java//java:defs.bzl", "java_library", "java_binary")
 load("@rules_rhino//java:defs.bzl", "junit5_test")
 load("@rules_rhino//babel:defs.bzl", "babel_preprocess", "npm_install")
+load("//bazel:copy.bzl", "copy_files")
 
 npm_install(
     name = "babel_deps",
@@ -32,17 +33,13 @@ babel_preprocess(
 
 # These payloads are compressed and must not be run through Babel. They are
 # copied (not transformed) to their top-level classpath locations.
-genrule(
+copy_files(
     name = "compressed_benchmarks",
     srcs = [
         "JetStream/RexBench/FlightPlanner/waypoints.js.z",
         "JetStream/SeaMonster/inspector-json-payload.js.z",
     ],
-    outs = [
-        "RexBench/FlightPlanner/waypoints.js.z",
-        "SeaMonster/inspector-json-payload.js.z",
-    ],
-    cmd = "cp $(location JetStream/RexBench/FlightPlanner/waypoints.js.z) $(location RexBench/FlightPlanner/waypoints.js.z) && cp $(location JetStream/SeaMonster/inspector-json-payload.js.z) $(location SeaMonster/inspector-json-payload.js.z)",
+    strip_prefix = "JetStream",
 )
 
 java_library(
