@@ -26,9 +26,9 @@ git_override(
 )
 
 git_override(
-    module_name = "rhino",
+     module_name = "rhino",
     remote = "https://github.com/mozilla/rhino.git",
-    commit = "209d9cef2e262edcf1d8be5c3651245a4fc7b9b3",
+    commit = "2499a6c60cd76a64e54c564067a8b0a8af578019",
 )
 
 maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
